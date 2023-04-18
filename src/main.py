@@ -136,6 +136,8 @@ if __name__ == '__main__':
 
     # set data
     data = load_data(args)
+    check_test_dist("Data distribuion of all test data", data)
+    # check_test_dist_by_client("by_client", data)
     args.num_classes = data.num_classes
     args.total_num_client, args.test_num_clients = data.train_num_clients, data.test_num_clients
     dataset = data.dataset

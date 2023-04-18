@@ -9,7 +9,9 @@ import random
 
 from .client import Client
 from .client_selection.config import *
+from .trainer import Trainer
 
+from torch.utils.data import TensorDataset
 
 
 class Server(object):
@@ -69,6 +71,35 @@ class Server(object):
         if self.args.method in LOSS_THRESHOLD:
             self.ltr = 0.0
 
+        if self.args.method == "PBFL":
+            self.global_trainer = Trainer(self.global_model, self.args)
+            all_data_by_label = {}
+            for client_id, local_data in self.test_data.items():
+                batch_x, batch_y = local_data.tensors
+                for x, y in zip(batch_x, batch_y):
+                    label = int(y)
+                    if label not in all_data_by_label:
+                        all_data_by_label[label] = [[], []]
+                    all_data_by_label[label][0].append(x)
+                    all_data_by_label[label][1].append(y)
+            min_sample = min([len(data_pair[1]) for data_pair in all_data_by_label.values()])
+            xss = []
+            yss = []
+            for label, data_pair in all_data_by_label.items():
+                xs, ys = data_pair
+                selected_data_idx = np.random.choice(
+                    len(ys), min_sample, replace=False)
+                xss.append(torch.stack(xs)[selected_data_idx])
+                yss.append(torch.stack(ys)[selected_data_idx])
+
+            X = torch.cat(xss, dim=0)
+            Y = torch.cat(yss, dim=0)
+            perm = torch.randperm(len(Y))
+            self.global_test_data = TensorDataset(X[perm], Y[perm])
+        else:
+            self.global_trainer = None
+            self.global_test_data = None
+        
 
     def _init_clients(self, init_model):
         """
@@ -84,6 +115,12 @@ class Server(object):
             c = Client(client_idx, self.train_sizes[client_idx], local_train_data, local_test_data,
                        deepcopy(init_model), self.args)
             self.client_list.append(c)
+
+    def global_test(self):
+        if self.global_trainer is None:
+            return
+        result = self.global_trainer.test(self.global_model, self.global_test_data)
+        return result
 
     def train(self):
         """
@@ -182,8 +219,9 @@ class Server(object):
             if self.args.method == "PBFL":
                 self.global_model.eval()
                 ### TODO: calculate the global loss and accuracy
-                self.selection_method.global_loss = np.mean(local_losses)
-                self.selection_method.global_accu = np.mean(accuracy)
+                result = self.global_test()
+                self.selection_method.global_loss = result["loss"]
+                self.selection_method.global_accu = result["acc"]
                 self.selection_method.post_update(client_indices, local_models, self.global_model)
 
             ## TEST
@@ -202,8 +240,6 @@ class Server(object):
         for k in self.files:
             if self.files[k] is not None:
                 self.files[k].close()
-
-
 
     def local_training(self, client_idx):
         """
@@ -283,7 +319,6 @@ class Server(object):
         print()
         return local_losses, accuracy, local_metrics
 
-
     def test(self, num_clients_for_test, phase='Test'):
         """
         test multiple clients
@@ -345,7 +380,8 @@ class Server(object):
         print('> {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, loss, acc))
 
         if phase == 'Test':
-            wandb.log(self.record)
+            if self.args.wandb:
+                wandb.log(self.record)
             if self.save_results:
                 if self.test_on_training_data:
                     tmp = '{:.8f},{:.4f},'.format(self.record['TrainALL/Loss'], self.record['TrainALL/Acc'])

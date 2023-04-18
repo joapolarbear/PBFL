@@ -113,6 +113,7 @@ class Proj_Bandit(ClientSelection):
 
         self.client2selected_cnt = np.array([0] * total)
         self.client_update_cnt = 0
+        self.total = total
 
         self.global_accu = 0
         self.global_loss = 1e6
@@ -169,12 +170,12 @@ class Proj_Bandit(ClientSelection):
         # assert len(self.client2proj) == num_of_client
 
         alpha = 0.1
-        self.client2proj = np.array(self.client2proj)
         ucb = self.client2proj + alpha * np.sqrt((2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
         # print("ucb", ucb)
         return ucb
     
     def post_update(self, client_idxs, local_models, global_m):
+        # import pdb; pdb.set_trace()
         self.accuracy_per_update.append(self.global_accu)
         self.loss_per_update.append(self.global_loss)
 
@@ -202,15 +203,17 @@ class Proj_Bandit(ClientSelection):
             metric: local_gradients
         '''
         # get clients' projected gradients
-        
-        ucb = self.get_ucb()
-
-        sorted_client_idxs = ucb.argsort()[::-1]
-
-        ### Select clients
-        selected_client_index = sorted_client_idxs[:n]
-        for client_idx in selected_client_index:
-            self.client2selected_cnt[client_idx] += 1
+        # import pdb; pdb.set_trace()
+        if self.client_update_cnt == 0:
+            # selected_client_index = np.arange(self.total)
+            selected_client_index = np.random.choice(self.total, n, replace=False)
+        else:
+            ucb = self.get_ucb()
+            sorted_client_idxs = ucb.argsort()[::-1]
+            ### Select clients
+            selected_client_index = sorted_client_idxs[:n]
+            for client_idx in selected_client_index:
+                self.client2selected_cnt[client_idx] += 1
 
         self.client_update_cnt += 1
 

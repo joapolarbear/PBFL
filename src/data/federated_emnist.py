@@ -21,7 +21,7 @@ class FederatedEMNISTDataset:
         print(f'Total number of users: {self.train_num_clients}')
 
     def _init_data(self, data_dir):
-        file_name = os.path.join(data_dir, 'FederatedEMNIST_preprocessed_.pickle')
+        file_name = os.path.join(data_dir, 'FederatedEMNIST_preprocessed.pickle')
         if os.path.isfile(file_name):
             with open(file_name, 'rb') as f:
                 dataset = pickle.load(f)
