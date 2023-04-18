@@ -14,13 +14,13 @@ except ModuleNotFoundError:
 import torch
 import random
 
-from .data import *
-from .model import *
-from .FL_core.server import Server
-from .FL_core.client_selection import *
-from .FL_core.federated_algorithm import *
-from .utils import utils
-from .utils.argparse import get_args
+from data import *
+from model import *
+from FL_core.server import Server
+from FL_core.client_selection import *
+from FL_core.federated_algorithm import *
+from utils import utils
+from utils.argparse import get_args
 
 
 
@@ -90,6 +90,8 @@ def client_selection_method(args):
         return DivFL(**kwargs, subset_ratio=args.subset_ratio)
     elif args.method == 'GradNorm':
         return GradNorm(**kwargs)
+    elif args.method == 'PBFL':
+        return Proj_Bandit(**kwargs)
     else:
         raise('CHECK THE NAME OF YOUR SELECTION METHOD')
 

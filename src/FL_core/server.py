@@ -123,9 +123,15 @@ class Server(object):
             if self.args.method in PRE_SELECTION_METHOD:
                 # np.random.seed((self.args.seed+1)*10000 + round_idx)
                 print(f'> pre-client selection {self.num_clients_per_round}/{len(client_indices)}')
-                client_indices = self.selection_method.select(self.num_clients_per_round, client_indices, None)
-                print(f'selected clients: {sorted(client_indices)[:10]}')
-
+                if self.args.method == "PBFL":
+                    kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
+                    self.global_model.eval()
+                    local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
+                    client_indices = self.selection_method.select(**kwargs, metric=local_models)
+                    del local_models
+                else:
+                    client_indices = self.selection_method.select(self.num_clients_per_round, client_indices, None)
+                print(f'selected clients: {sorted(client_indices)[:10]} ... ')
 
             ## CLIENT UPDATE (TRAINING)
             local_losses, accuracy, local_metrics = self.train_clients(client_indices)
@@ -161,7 +167,7 @@ class Server(object):
 
             ## SERVER AGGREGATION
             # DEBUGGING
-            assert len(client_indices) == self.num_clients_per_round
+            assert len(client_indices) == self.num_clients_per_round, (len(client_indices), self.num_clients_per_round)
 
             # aggregate local models
             local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
@@ -173,6 +179,12 @@ class Server(object):
             # update aggregated model to global model
             self.global_model.load_state_dict(global_model_params)
 
+            if self.args.method == "PBFL":
+                self.global_model.eval()
+                ### TODO: calculate the global loss and accuracy
+                self.selection_method.global_loss = np.mean(local_losses)
+                self.selection_method.global_accu = np.mean(accuracy)
+                self.selection_method.post_update(client_indices, local_models, self.global_model)
 
             ## TEST
             if round_idx % self.args.test_freq == 0:

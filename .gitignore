@@ -1,4 +1,4 @@
 afl.code-workspace
 results/
 wandb/
-*/__pycache__/
+*__pycache__/
