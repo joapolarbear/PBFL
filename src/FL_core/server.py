@@ -71,35 +71,31 @@ class Server(object):
         if self.args.method in LOSS_THRESHOLD:
             self.ltr = 0.0
 
-        if self.args.method == "PBFL":
-            self.global_trainer = Trainer(self.global_model, self.args)
-            all_data_by_label = {}
-            for client_id, local_data in self.test_data.items():
-                batch_x, batch_y = local_data.tensors
-                for x, y in zip(batch_x, batch_y):
-                    label = int(y)
-                    if label not in all_data_by_label:
-                        all_data_by_label[label] = [[], []]
-                    all_data_by_label[label][0].append(x)
-                    all_data_by_label[label][1].append(y)
-            min_sample = min([len(data_pair[1]) for data_pair in all_data_by_label.values()])
-            xss = []
-            yss = []
-            for label, data_pair in all_data_by_label.items():
-                xs, ys = data_pair
-                selected_data_idx = np.random.choice(
-                    len(ys), min_sample, replace=False)
-                xss.append(torch.stack(xs)[selected_data_idx])
-                yss.append(torch.stack(ys)[selected_data_idx])
+        self.global_trainer = Trainer(deepcopy(self.global_model), self.args)
+        all_data_by_label = {}
+        for client_id, local_data in self.test_data.items():
+            batch_x, batch_y = local_data.tensors
+            for x, y in zip(batch_x, batch_y):
+                label = int(y)
+                if label not in all_data_by_label:
+                    all_data_by_label[label] = [[], []]
+                all_data_by_label[label][0].append(x)
+                all_data_by_label[label][1].append(y)
+        min_sample = min([len(data_pair[1]) for data_pair in all_data_by_label.values()])
+        xss = []
+        yss = []
+        for label, data_pair in all_data_by_label.items():
+            xs, ys = data_pair
+            selected_data_idx = np.random.choice(
+                len(ys), min_sample, replace=False)
+            xss.append(torch.stack(xs)[selected_data_idx])
+            yss.append(torch.stack(ys)[selected_data_idx])
 
-            X = torch.cat(xss, dim=0)
-            Y = torch.cat(yss, dim=0)
-            perm = torch.randperm(len(Y))
-            self.global_test_data = TensorDataset(X[perm], Y[perm])
-        else:
-            self.global_trainer = None
-            self.global_test_data = None
-        
+        X = torch.cat(xss, dim=0)
+        Y = torch.cat(yss, dim=0)
+        perm = torch.randperm(len(Y))
+        self.global_test_data = TensorDataset(X[perm], Y[perm])
+   
 
     def _init_clients(self, init_model):
         """
@@ -162,7 +158,7 @@ class Server(object):
                 print(f'> pre-client selection {self.num_clients_per_round}/{len(client_indices)}')
                 if self.args.method == "PBFL":
                     kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
-                    self.global_model.eval()
+                    # self.global_model.eval()
                     local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
                     client_indices = self.selection_method.select(**kwargs, metric=local_models)
                     del local_models
@@ -212,28 +208,50 @@ class Server(object):
                 global_model_params = self.federated_method.update(local_models, client_indices)
             else:
                 global_model_params = self.federated_method.update(local_models, client_indices, self.global_model, self.client_list)
+            
+            # def compare2model_param(a: dict, b: dict):
+            #     for key in a.keys():
+            #         print(key, a[key].detach().cpu() - b[key].detach().cpu())
+
+            # prev_p = self.global_model.state_dict()
+            # compare2model_param(global_model_params, prev_p)
 
             # update aggregated model to global model
+            # prev_global_params = deepcopy([tens.detach().to(self.device) for tens in list(self.global_model.parameters())])
             self.global_model.load_state_dict(global_model_params)
+            # prev_global_params2 = deepcopy([tens.detach().to(self.device) for tens in list(self.global_model.parameters())])
+            # global_grad = [(global_weights - prev_global_weights).flatten()
+            #                        for global_weights, prev_global_weights in
+            #                        zip(prev_global_params2, prev_global_params)]
+            # print(global_grad)
+            # import pdb; pdb.set_trace()
 
+
+            ## TEST
+            # if round_idx % self.args.test_freq == 0:
+            self.global_model.eval()
+            # test on train dataset
+            if self.test_on_training_data:
+                self.test(self.total_num_client, phase='TrainALL')
+                self.test_on_training_data = False
+            # test on test dataset
+            result = self.global_test()
             if self.args.method == "PBFL":
-                self.global_model.eval()
-                ### TODO: calculate the global loss and accuracy
-                result = self.global_test()
                 self.selection_method.global_loss = result["loss"]
                 self.selection_method.global_accu = result["acc"]
                 self.selection_method.post_update(client_indices, local_models, self.global_model)
 
-            ## TEST
-            if round_idx % self.args.test_freq == 0:
-                self.global_model.eval()
-                # test on train dataset
-                if self.test_on_training_data:
-                    self.test(self.total_num_client, phase='TrainALL')
-                    self.test_on_training_data = False
+            # self.test(len(self.test_clients), phase='Test')
+            phase='Test'
+            self.record[f'{phase}/Loss'] = result["loss"]
+            self.record[f'{phase}/Acc'] = result["acc"]
+            status = num_clients if phase == 'Train' else 'ALL'
 
-                # test on test dataset
-                self.test(len(self.test_clients), phase='Test')
+            print('> {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, result["loss"], result["acc"]))
+
+            
+            if self.args.wandb:
+                wandb.log(self.record)
 
             del local_models, local_losses, accuracy
 

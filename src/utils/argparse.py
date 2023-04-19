@@ -48,7 +48,7 @@ def get_args():
     parser.add_argument('--num_gn', type=int, default=0, help='number of group normalization')
 
     parser.add_argument('--distance_type', type=str, default='L1', help='distance type for clustered sampling 2')
-    parser.add_argument('--subset_ratio', type=float, default=None, help='subset size for DivFL')
+    parser.add_argument('--subset_ratio', type=float, default=0.1, help='subset size for DivFL')
 
     parser.add_argument('--dirichlet_alpha', type=float, default=0.1, help='ratio of data partition from dirichlet distribution')
     

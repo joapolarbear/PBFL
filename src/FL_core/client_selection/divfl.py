@@ -8,6 +8,7 @@ from .client_selection import ClientSelection
 import numpy as np
 import math
 import torch
+from copy import deepcopy
 from tqdm import tqdm
 from itertools import product
 
@@ -123,9 +124,9 @@ class Proj_Bandit(ClientSelection):
         self.loss_per_update = [self.global_loss]
 
     def init(self, global_m, l=None):
-        self.prev_global_m = global_m
+        self.prev_global_params = deepcopy([tens.detach().to(self.device) for tens in list(global_m.parameters())])
 
-    def update_proj_list(self, selected_client_idxs, global_m, prev_global_m, local_models, improved):
+    def update_proj_list(self, selected_client_idxs, global_m, local_models, improved):
         """
         return the `projected gradient` 
         """
@@ -134,7 +135,7 @@ class Proj_Bandit(ClientSelection):
         for model in local_models:
             local_model_params.append([tens.detach().to(self.device) for tens in list(model.parameters())]) #.numpy()
         
-        prev_global_model_params = [tens.detach().to(self.device) for tens in list(prev_global_m.parameters())]
+        prev_global_model_params = self.prev_global_params
         global_model_params = [tens.detach().to(self.device) for tens in list(global_m.parameters())]
         global_grad = [(global_weights - prev_global_weights).flatten()
                                    for global_weights, prev_global_weights in
@@ -147,7 +148,6 @@ class Proj_Bandit(ClientSelection):
                                    zip(local_params, prev_global_model_params)])
 
         idxs_proj = []
-        # import pdb; pdb.set_trace()
         grad_norm = [torch.sqrt(torch.sum(global_grad_per_key**2)) for global_grad_per_key in global_grad]
         for local_grad in local_model_grads:
             proj_list = []
@@ -155,6 +155,7 @@ class Proj_Bandit(ClientSelection):
                 proj_list.append(torch.dot(local_grad_per_key, global_grad_per_key) / grad_norm_per_key)
             idxs_proj.append(torch.mean(torch.Tensor(proj_list)))
 
+        # import pdb; pdb.set_trace()
         final_reward = torch.nn.Softmax(dim=0)(torch.Tensor(idxs_proj)) * improved
         # print("projection after softmax", final_reward)
         for client_idx, reward in zip(selected_client_idxs, (final_reward)):
@@ -193,7 +194,7 @@ class Proj_Bandit(ClientSelection):
             ### Worse accuracy, smaller projection is better
             improved = -1
 
-        self.update_proj_list(client_idxs, global_m, self.prev_global_m, local_models, improved)
+        self.update_proj_list(client_idxs, global_m, local_models, improved)
 
     def select(self, n, client_idxs, metric, round=0, results=None):
         # pre-select
