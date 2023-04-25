@@ -6,7 +6,7 @@ from copy import deepcopy
 
 
 class Client(object):
-    def __init__(self, client_idx, nTrain, local_train_data, local_test_data, model, args):
+    def __init__(self, client_idx, nTrain, local_train_data, local_test_data, args):
         """
         A client
         ---
@@ -21,7 +21,7 @@ class Client(object):
         self.client_idx = client_idx
         self.test_data = local_test_data
         self.device = args.device
-        self.trainer = Trainer(model, args)
+        self.trainer = Trainer(args)
         self.num_epoch = args.num_epoch  # E: number of local epoch
         self.nTrain = nTrain
         self.loss_div_sqrt = args.loss_div_sqrt

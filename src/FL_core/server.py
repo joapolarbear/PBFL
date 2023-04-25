@@ -71,7 +71,7 @@ class Server(object):
         if self.args.method in LOSS_THRESHOLD:
             self.ltr = 0.0
 
-        self.global_trainer = Trainer(deepcopy(self.global_model), self.args)
+        self.global_trainer = Trainer(self.args)
         all_data_by_label = {}
         for client_id, local_data in self.test_data.items():
             batch_x, batch_y = local_data.tensors
@@ -108,8 +108,8 @@ class Server(object):
         for client_idx in range(self.total_num_client):
             local_train_data = self.train_data[client_idx]
             local_test_data = self.test_data[client_idx] if client_idx in self.test_clients else np.array([])
-            c = Client(client_idx, self.train_sizes[client_idx], local_train_data, local_test_data,
-                       deepcopy(init_model), self.args)
+            c = Client(client_idx, self.train_sizes[client_idx], local_train_data,
+                local_test_data, self.args)
             self.client_list.append(c)
 
     def global_test(self):
@@ -167,8 +167,8 @@ class Server(object):
                 print(f'selected clients: {sorted(client_indices)[:10]} ... ')
 
             ## CLIENT UPDATE (TRAINING)
+            engated_client_indices = deepcopy(client_indices)
             local_losses, accuracy, local_metrics = self.train_clients(client_indices)
-
 
             ## CLIENT SELECTION
             if self.args.method not in PRE_SELECTION_METHOD:
@@ -191,7 +191,6 @@ class Server(object):
                 local_losses = np.take(local_losses, selected_client_indices)
                 accuracy = np.take(accuracy, selected_client_indices)
 
-
             ## CHECK and SAVE current updates
             # self.weight_variance(local_models) # check variance of client weights
             self.save_current_updates(local_losses, accuracy, len(client_indices), phase='Train', round=round_idx)
@@ -209,23 +208,8 @@ class Server(object):
             else:
                 global_model_params = self.federated_method.update(local_models, client_indices, self.global_model, self.client_list)
             
-            # def compare2model_param(a: dict, b: dict):
-            #     for key in a.keys():
-            #         print(key, a[key].detach().cpu() - b[key].detach().cpu())
-
-            # prev_p = self.global_model.state_dict()
-            # compare2model_param(global_model_params, prev_p)
-
             # update aggregated model to global model
-            # prev_global_params = deepcopy([tens.detach().to(self.device) for tens in list(self.global_model.parameters())])
             self.global_model.load_state_dict(global_model_params)
-            # prev_global_params2 = deepcopy([tens.detach().to(self.device) for tens in list(self.global_model.parameters())])
-            # global_grad = [(global_weights - prev_global_weights).flatten()
-            #                        for global_weights, prev_global_weights in
-            #                        zip(prev_global_params2, prev_global_params)]
-            # print(global_grad)
-            # import pdb; pdb.set_trace()
-
 
             ## TEST
             # if round_idx % self.args.test_freq == 0:
@@ -245,15 +229,17 @@ class Server(object):
             phase='Test'
             self.record[f'{phase}/Loss'] = result["loss"]
             self.record[f'{phase}/Acc'] = result["acc"]
-            status = num_clients if phase == 'Train' else 'ALL'
+            status = 'ALL'
 
             print('> {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, result["loss"], result["acc"]))
 
-            
             if self.args.wandb:
                 wandb.log(self.record)
 
+            ## Clear garbages
             del local_models, local_losses, accuracy
+            for client_idx in engated_client_indices:
+                self.client_list[client_idx].trainer.clear_model()
 
         for k in self.files:
             if self.files[k] is not None:
@@ -271,7 +257,7 @@ class Server(object):
         client = self.client_list[client_idx]
         if self.args.method in LOSS_THRESHOLD:
             client.trainer.update_ltr(self.ltr)
-        result = client.train(deepcopy(self.global_model))
+        result = client.train(self.global_model)
         return result
 
     def local_testing(self, client_idx):

@@ -10,7 +10,7 @@ from sklearn.metrics import roc_auc_score
 
 
 class Trainer:
-    def __init__(self, model, args):
+    def __init__(self, args):
         """
         trainer
         ---
@@ -31,7 +31,7 @@ class Trainer:
         self.loader_kwargs = {'batch_size': self.batch_size, 'pin_memory': True, 'shuffle': True}
 
         # model
-        self.model = model
+        self.model = None
         self.client_optimizer = args.client_optimizer
 
 
@@ -46,7 +46,13 @@ class Trainer:
         """
         set current model for training
         """
-        self.model.load_state_dict(model.cpu().state_dict())
+        if self.model is None:
+            self.model = deepcopy(model)
+        else:
+            self.model.load_state_dict(model.state_dict())
+    
+    def clear_model(self):
+        self.model = None
 
     def train(self, data):
         """
@@ -59,7 +65,7 @@ class Trainer:
         """
         dataloader = DataLoader(data, **self.loader_kwargs)
 
-        self.model = self.model.to(self.device)
+        self.model.to(self.device)
 
         
         self.model.train()
@@ -91,24 +97,22 @@ class Trainer:
 
                 train_loss += loss.detach().item() * input.size(0)
                 
-                correct += preds.eq(labels).sum().cpu().data.numpy()
+                correct += preds.eq(labels).sum().detach().cpu().data.numpy()
                 total += input.size(0)
 
-                
+
                 if self.num_updates is not None and num_update + 1 == self.num_updates:
                     if total < self.batch_size:
                         print(f'break! {total}', end=' ')
                     break
 
                 del input, labels, output
-                
-
+        
         self.model = self.model.cpu()
 
         assert total > 0
             
         result = {'loss': train_loss / total, 'acc': correct / total, 'metric': train_loss / total}
-        
         
         # if you track each client's loss
         # sys.stdout.write(r'\nLoss {:.6f} Acc {:.4f}'.format(result['loss'], result['acc']))
