@@ -51,9 +51,9 @@ class DivFL(ClientSelection):
         """
         local_model_params = []
         for model in local_models:
-            local_model_params += [[tens.detach().to(self.device) for tens in list(model.parameters())]] #.numpy()
+            local_model_params += [[tens.detach().cpu() for tens in list(model.parameters())]] #.numpy()
 
-        global_model_params = [tens.detach().to(self.device) for tens in list(global_m.parameters())]
+        global_model_params = [tens.detach().cpu() for tens in list(global_m.parameters())]
 
         local_model_grads = []
         for local_params in local_model_params:
@@ -206,8 +206,8 @@ class Proj_Bandit(ClientSelection):
         # get clients' projected gradients
         # import pdb; pdb.set_trace()
         if self.client_update_cnt == 0:
-            # selected_client_index = np.arange(self.total)
-            selected_client_index = np.random.choice(self.total, n, replace=False)
+            selected_client_index = np.arange(self.total)
+            # selected_client_index = np.random.choice(self.total, n, replace=False)
         else:
             ucb = self.get_ucb()
             sorted_client_idxs = ucb.argsort()[::-1]
