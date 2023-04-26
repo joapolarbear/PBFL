@@ -11,7 +11,7 @@ NEED_SETUP_METHOD = ['Cluster1', 'Cluster2', 'Pow-d', 'NumDataSampling', 'NumDat
                      'Powd_baseline0', 'Powd_baseline1', 'Powd_baseline2', 'PBFL']
 
 
-NEED_INIT_METHOD = ['Cluster2', 'OCS', 'DivFL', 'PBFL']
+NEED_INIT_METHOD = ['Cluster2', 'OCS', 'DivFL']
 
 
 CANDIDATE_SELECTION_METHOD = ['Pow-d', 'Powd_baseline0', 'Powd_baseline1', 'Powd_baseline2']

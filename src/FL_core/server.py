@@ -140,7 +140,12 @@ class Server(object):
 
             # set client selection methods
             # initialize selection methods by setting given global model
+            if self.args.method == "PBFL":
+                self.selection_method.init(self.global_model)
             if self.args.method in NEED_INIT_METHOD:
+                raise NotImplementedError("We do not maintain a cost model for each client, "
+                    "so we fail to get the local model before client selection. \n"
+                    "\t Methods requiring init only include `Cluster2`")
                 local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
                 self.selection_method.init(self.global_model, local_models)
                 del local_models
@@ -155,14 +160,17 @@ class Server(object):
             # client selection before local training (for efficiency)
             if self.args.method in PRE_SELECTION_METHOD:
                 # np.random.seed((self.args.seed+1)*10000 + round_idx)
-                print(f'> pre-client selection {self.num_clients_per_round}/{len(client_indices)}')
+                
                 if self.args.method == "PBFL":
                     kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
                     # self.global_model.eval()
-                    local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
-                    client_indices = self.selection_method.select(**kwargs, metric=local_models)
-                    del local_models
+                    # local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
+                    num_before = len(client_indices)
+                    client_indices = self.selection_method.select(**kwargs, metric=None)
+                    # del local_models
+                    print(f'> pre-client selection {len(client_indices)}/{num_before}')
                 else:
+                    print(f'> pre-client selection {self.num_clients_per_round}/{len(client_indices)}')
                     client_indices = self.selection_method.select(self.num_clients_per_round, client_indices, None)
                 print(f'selected clients: {sorted(client_indices)[:10]} ... ')
 
@@ -196,10 +204,11 @@ class Server(object):
             self.save_current_updates(local_losses, accuracy, len(client_indices), phase='Train', round=round_idx)
             self.save_selected_clients(round_idx, client_indices)
 
-
             ## SERVER AGGREGATION
             # DEBUGGING
-            assert len(client_indices) == self.num_clients_per_round, (len(client_indices), self.num_clients_per_round)
+            if self.args.method != "PBFL":
+                assert len(client_indices) == self.num_clients_per_round, \
+                    (len(client_indices), self.num_clients_per_round)
 
             # aggregate local models
             local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]

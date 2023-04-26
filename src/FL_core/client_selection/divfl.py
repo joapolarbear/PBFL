@@ -118,6 +118,8 @@ class Proj_Bandit(ClientSelection):
 
         self.global_accu = 0
         self.global_loss = 1e6
+
+        self.warmup = True
     
     def setup(self, n_samples):
         self.accuracy_per_update = [self.global_accu]
@@ -171,7 +173,8 @@ class Proj_Bandit(ClientSelection):
         # assert len(self.client2proj) == num_of_client
 
         alpha = 0.1
-        ucb = self.client2proj + alpha * np.sqrt((2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
+        ucb = self.client2proj + alpha * np.sqrt(
+            (2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
         # print("ucb", ucb)
         return ucb
     
@@ -204,9 +207,15 @@ class Proj_Bandit(ClientSelection):
             metric: local_gradients
         '''
         # get clients' projected gradients
-        # import pdb; pdb.set_trace()
-        if self.client_update_cnt == 0:
-            selected_client_index = np.arange(self.total)
+        MAX_SELECTED_NUM = 1000
+        if self.warmup:
+            print(f"> PBFL warmup {self.client_update_cnt}")
+            st = self.client_update_cnt * MAX_SELECTED_NUM
+            ed = st + MAX_SELECTED_NUM
+            if ed >= self.total:
+                self.warmup = False
+            ed = min(ed, self.total)
+            selected_client_index = np.arange(st, ed)
             # selected_client_index = np.random.choice(self.total, n, replace=False)
         else:
             ucb = self.get_ucb()
