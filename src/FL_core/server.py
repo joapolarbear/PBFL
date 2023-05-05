@@ -140,15 +140,16 @@ class Server(object):
 
             # set client selection methods
             # initialize selection methods by setting given global model
-            if self.args.method == "PBFL":
-                self.selection_method.init(self.global_model)
             if self.args.method in NEED_INIT_METHOD:
-                raise NotImplementedError("We do not maintain a cost model for each client, "
-                    "so we fail to get the local model before client selection. \n"
-                    "\t Methods requiring init only include `Cluster2`")
-                local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
-                self.selection_method.init(self.global_model, local_models)
-                del local_models
+                if self.args.method in ["PBFL", "DivFL"]:
+                    self.selection_method.init(self.global_model)
+                else:
+                    raise NotImplementedError("We do not maintain a cost model for each client, "
+                        "so we fail to get the local model before client selection. \n"
+                        "\t Methods requiring init only include `Cluster2`")
+                    local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
+                    self.selection_method.init(self.global_model, local_models)
+                    del local_models
             # candidate client selection before local training
             if self.args.method in CANDIDATE_SELECTION_METHOD:
                 # np.random.seed((self.args.seed+1)*10000000 + round_idx)

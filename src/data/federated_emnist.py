@@ -32,8 +32,10 @@ class FederatedEMNISTDataset:
 
 
 def preprocess(data_dir, num_clients=None):
-    train_data = h5py.File(os.path.join(data_dir, 'fed_emnist_train.h5'), 'r')
-    test_data = h5py.File(os.path.join(data_dir, 'fed_emnist_test.h5'), 'r')
+    # train_data = h5py.File(os.path.join(data_dir, 'fed_emnist_train.h5'), 'r')
+    # test_data = h5py.File(os.path.join(data_dir, 'fed_emnist_test.h5'), 'r')
+    train_data = h5py.File(os.path.join(data_dir, 'mytrain.json'), 'r')
+    test_data = h5py.File(os.path.join(data_dir, 'mytest.json'), 'r')
 
     train_ids = list(train_data['examples'].keys())
     test_ids = list(test_data['examples'].keys())

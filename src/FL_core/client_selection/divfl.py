@@ -41,7 +41,7 @@ class DivFL(ClientSelection):
         # get clients' dissimilarity matrix
         self.norm_diff = self.get_matrix_similarity_from_grads(local_grads)
         # stochastic greedy
-        selected_clients = self.stochastic_greedy(len(client_idxs), n)
+        selected_clients = self.lazy_greedy(len(client_idxs), n)
         return list(selected_clients)
 
     def get_gradients(self, global_m, local_models):
@@ -78,7 +78,7 @@ class DivFL(ClientSelection):
         return metric_matrix
 
     def stochastic_greedy(self, num_total_clients, num_select_clients):
-        # num_clients is the target number of selected clients each round,
+        # num_select_clients is the target number of selected clients each round,
         # subsample is a parameter for the stochastic greedy alg
         # initialize the ground set and the selected set
         V_set = set(range(num_total_clients))
@@ -102,6 +102,72 @@ class DivFL(ClientSelection):
             SUi.add(R_set[i])
             V_set.remove(R_set[i])
         return SUi
+    
+    def lazy_greedy(self,num_total_clients,  num_select_clients):
+        # initialize the ground set and the selected set
+        V_set = set(range(len(self.clients)))
+        SUi = set()
+
+        S_util = 0
+        marg_util = self.norm_diff.sum(0)
+        i = marg_util.argmin()
+        L_s0 = 2. * marg_util.max()
+        marg_util = L_s0 - marg_util
+        client_min = self.norm_diff[:,i]
+        # print(i)
+        SUi.add(i)
+        V_set.remove(i)
+        S_util = marg_util[i]
+        marg_util[i] = -1.
+        
+        while len(SUi) < num_select_clients:
+            argsort_V = np.argsort(marg_util)[len(SUi):]
+            for ni in range(len(argsort_V)):
+                i = argsort_V[-ni-1]
+                SUi.add(i)
+                client_min_i = np.minimum(client_min, self.norm_diff[:,i])
+                SUi_util = L_s0 - client_min_i.sum()
+
+                marg_util[i] = SUi_util - S_util
+                if ni > 0:
+                    if marg_util[i] < marg_util[pre_i]:
+                        if ni == len(argsort_V) - 1 or marg_util[pre_i] >= marg_util[argsort_V[-ni-2]]:
+                            S_util += marg_util[pre_i]
+                            # print(pre_i, L_s0 - S_util)
+                            SUi.remove(i)
+                            SUi.add(pre_i)
+                            V_set.remove(pre_i)
+                            marg_util[pre_i] = -1.
+                            client_min = client_min_pre_i.copy()
+                            break
+                        else:
+                            SUi.remove(i)
+                    else:
+                        if ni == len(argsort_V) - 1 or marg_util[i] >= marg_util[argsort_V[-ni-2]]:
+                            S_util = SUi_util
+                            # print(i, L_s0 - S_util)
+                            V_set.remove(i)
+                            marg_util[i] = -1.
+                            client_min = client_min_i.copy()
+                            break
+                        else:
+                            pre_i = i
+                            SUi.remove(i)
+                            client_min_pre_i = client_min_i.copy()
+                else:
+                    if marg_util[i] >= marg_util[argsort_V[-ni-2]]:
+                        S_util = SUi_util
+                        # print(i, L_s0 - S_util)
+                        V_set.remove(i)
+                        marg_util[i] = -1.
+                        client_min = client_min_i.copy()
+                        break
+                    else:
+                        pre_i = i
+                        SUi.remove(i)
+                        client_min_pre_i = client_min_i.copy()
+        return SUi
+
 
 class Proj_Bandit(ClientSelection):
     def __init__(self, total, device):
@@ -209,13 +275,15 @@ class Proj_Bandit(ClientSelection):
         # get clients' projected gradients
         MAX_SELECTED_NUM = 1000
         if self.warmup:
-            print(f"> PBFL warmup {self.client_update_cnt}")
-            st = self.client_update_cnt * MAX_SELECTED_NUM
-            ed = st + MAX_SELECTED_NUM
-            if ed >= self.total:
-                self.warmup = False
-            ed = min(ed, self.total)
-            selected_client_index = np.arange(st, ed)
+            self.warmup = False
+            # print(f"> PBFL warmup {self.client_update_cnt}")
+            # st = self.client_update_cnt * MAX_SELECTED_NUM
+            # ed = st + MAX_SELECTED_NUM
+            # if ed >= self.total:
+            #     self.warmup = False
+            # ed = min(ed, self.total)
+            # selected_client_index = np.arange(st, ed)
+            selected_client_index = np.arange(self.total)
             # selected_client_index = np.random.choice(self.total, n, replace=False)
         else:
             ucb = self.get_ucb()
