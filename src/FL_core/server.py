@@ -95,6 +95,7 @@ class Server(object):
         Y = torch.cat(yss, dim=0)
         perm = torch.randperm(len(Y))
         self.global_test_data = TensorDataset(X[perm], Y[perm])
+        print(f"Global test data size: {len(Y)}")
    
 
     def _init_clients(self, init_model):

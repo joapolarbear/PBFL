@@ -13,7 +13,7 @@ class FederatedEMNISTDatasetIID:
         self.num_classes = 62
         # self.train_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
         # self.test_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
-        self.min_num_samples = 100
+        self.min_num_samples = 10
         # min_num_samples = 150; num_clients = 2492
         # min_num_samples = 100; num_clients = 
 
@@ -162,3 +162,36 @@ def preprocess(data_dir, min_num_samples):
     }
 
     return dataset
+
+# import json
+# import numpy as np
+# import h5py
+# import os
+
+# with open("mytest.json", 'r') as fp:
+#     test_data = json.load(fp)
+
+# X1 = np.empty((0, 784), dtype=float)
+# for xypair in test_data['user_data'].values():
+#     x = np.array(xypair["x"])
+#     X1 = np.concatenate((X1, x), axis=0)
+#     y = xypair["y"]
+
+# np.std(X1, axis=0)
+
+
+# data_dir = "."
+# test_data = h5py.File(os.path.join(data_dir, 'fed_emnist_test.h5'), 'r')
+
+# X2 = np.empty((0, 784), dtype=float)
+# for xypair in test_data['examples'].values():
+#     x = np.array(xypair["pixels"][()]).reshape(-1, 784)
+#     X2 = np.concatenate((X2, x), axis=0)
+#     if len(X2) > len(X1):
+#         break
+
+# np.std(X2, axis=0)
+
+# rst = np.nan_to_num(np.std(X1, axis=0) / np.std(X2, axis=0))
+# for p in [5, 10, 25, 50, 75, 90, 10]:   
+#     print(p, ": ", np.percentile(rst, p))

@@ -39,7 +39,7 @@ class DivFL(ClientSelection):
         # get clients' gradients
         local_grads = self.get_gradients(self.prev_global_m, metric)
         # get clients' dissimilarity matrix
-        self.norm_diff = self.get_matrix_similarity_from_grads(local_grads)
+        self.norm_diff = self.get_matrix_similarity_from_grads(local_grads).cpu().detach().numpy()
         # stochastic greedy
         selected_clients = self.lazy_greedy(len(client_idxs), n)
         return list(selected_clients)
@@ -105,7 +105,7 @@ class DivFL(ClientSelection):
     
     def lazy_greedy(self,num_total_clients,  num_select_clients):
         # initialize the ground set and the selected set
-        V_set = set(range(len(self.clients)))
+        V_set = set(range(num_total_clients))
         SUi = set()
 
         S_util = 0
@@ -238,9 +238,10 @@ class Proj_Bandit(ClientSelection):
         assert isinstance(self.client2proj, list) or isinstance(self.client2proj, np.ndarray)
         # assert len(self.client2proj) == num_of_client
 
-        alpha = 0.1
-        ucb = self.client2proj + alpha * np.sqrt(
-            (2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
+        alpha = 0.01
+        # ucb = self.client2proj + alpha * np.sqrt(
+        #     (2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
+        ucb = self.client2proj
         # print("ucb", ucb)
         return ucb
     
@@ -275,15 +276,15 @@ class Proj_Bandit(ClientSelection):
         # get clients' projected gradients
         MAX_SELECTED_NUM = 1000
         if self.warmup:
-            self.warmup = False
-            # print(f"> PBFL warmup {self.client_update_cnt}")
-            # st = self.client_update_cnt * MAX_SELECTED_NUM
-            # ed = st + MAX_SELECTED_NUM
-            # if ed >= self.total:
-            #     self.warmup = False
-            # ed = min(ed, self.total)
-            # selected_client_index = np.arange(st, ed)
-            selected_client_index = np.arange(self.total)
+            self.warmup = True
+            print(f"> PBFL warmup {self.client_update_cnt}")
+            st = self.client_update_cnt * MAX_SELECTED_NUM
+            ed = st + MAX_SELECTED_NUM
+            if ed >= self.total:
+                self.warmup = False
+            ed = min(ed, self.total)
+            selected_client_index = np.arange(st, ed)
+            # selected_client_index = np.arange(self.total)
             # selected_client_index = np.random.choice(self.total, n, replace=False)
         else:
             ucb = self.get_ucb()
@@ -296,5 +297,3 @@ class Proj_Bandit(ClientSelection):
         self.client_update_cnt += 1
 
         return selected_client_index.astype(int)
-
-         
