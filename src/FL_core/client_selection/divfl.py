@@ -232,16 +232,17 @@ class Proj_Bandit(ClientSelection):
         for client_idx in range(len(self.client2proj)):
             self.client2proj[client_idx] = np.mean(self.client2rewards[client_idx])
     
-    def get_ucb(self):
+    def get_ucb(self, a):
         momemtum_based_grad_proj = self.client2proj
         # print("Proj", momemtum_based_grad_proj)
         assert isinstance(self.client2proj, list) or isinstance(self.client2proj, np.ndarray)
         # assert len(self.client2proj) == num_of_client
 
-        alpha = 0.01
-        # ucb = self.client2proj + alpha * np.sqrt(
-        #     (2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
-        ucb = self.client2proj
+        alpha = a/750
+        
+        ucb = self.client2proj + alpha * np.sqrt(
+            (2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
+        
         # print("ucb", ucb)
         return ucb
     
@@ -287,7 +288,7 @@ class Proj_Bandit(ClientSelection):
             # selected_client_index = np.arange(self.total)
             # selected_client_index = np.random.choice(self.total, n, replace=False)
         else:
-            ucb = self.get_ucb()
+            ucb = self.get_ucb(a=self.client_update_cnt)
             sorted_client_idxs = ucb.argsort()[::-1]
             ### Select clients
             selected_client_index = sorted_client_idxs[:n]

@@ -1,11 +1,13 @@
 import os
 import pickle
+import json
+from tqdm import tqdm
 
 import bz2
 import numpy as np
 import torch
 import torch.nn.functional as F
-from tqdm import tqdm
+from torch.utils.data import TensorDataset
 
 
 class RedditDataset:
@@ -35,7 +37,10 @@ class RedditDataset:
 def preprocess(data_dir):
     users, dataset = {}, {}
     user_idx = 0
-    with bz2.BZ2File(data_dir+'/RC_2017-11.bz2', 'r') as f:
+    # _file_name = 'RC_2017-11.bz2'
+    _file_name = 'RC_2017-03.bz2'
+    print("Loading bz2 files ... ")
+    with bz2.BZ2File(os.path.join(data_dir, _file_name), 'r') as f:
         for line in tqdm(f):
             line = json.loads(line.rstrip())
             user = line['author']
@@ -55,10 +60,10 @@ def preprocess(data_dir):
                 dataset[users[user]]['text'].append(line['body'])
                 dataset[users[user]]['label'].append(line['controversiality'])
 
-    print(len(users.keys()), len(dataset.keys()))
+    print("users.keys: ", len(users.keys()), ", dataset.keys: ", len(dataset.keys()))
 
     num_data_per_clients = [dataset[x]['num_data'] for x in dataset.keys()]
-    print(min(num_data_per_clients), max(num_data_per_clients), np.mean(num_data_per_clients),
+    print("min/max/mean/median num_data_per_clients: ", min(num_data_per_clients), max(num_data_per_clients), np.mean(num_data_per_clients),
           np.median(num_data_per_clients))
 
     np.random.seed(0)
@@ -89,7 +94,7 @@ def preprocess(data_dir):
                     new_idx += 1
 
     num_clients = len(final_dataset.keys())
-    print(num_clients)
+    print("num_clients: ", num_clients)
 
     train_dataset, test_dataset = {}, {}
 
@@ -123,14 +128,14 @@ def preprocess(data_dir):
 
     for client_idx in tqdm(range(len(train_dataset.keys())), desc='>> Split data to clients'):
         train_data = train_dataset[client_idx]
-        training_data = _batch_data(train_data)
+        training_data = _batch_data_v2(train_data)
 
         train_data_local_dict[client_idx] = training_data
         train_data_local_num_dict[client_idx] = train_data['datasize']
 
         if client_idx in test_clients:
             test_data = test_dataset[client_idx]
-            testing_data = _batch_data(test_data)
+            testing_data = _batch_data_v2(test_data)
             test_data_local_dict[client_idx] = testing_data
             test_data_local_num_dict[client_idx] = test_data['datasize']
 
@@ -175,6 +180,26 @@ def _batch_data(data, batch_size=128, maxlen=400):
         batched_y = torch.tensor(batched_y, dtype=torch.long)
         batch_data.append((batched_x, batched_y))
     return batch_data#, maxlen_lst
+
+def _batch_data_v2(data, maxlen=400):
+    '''
+    data is a dict := {'x': [numpy array], 'y': [numpy array]} (on one client)
+    returns x, y, which are both numpy array of length: batch_size
+    '''
+    data_x = np.array(data['text'])
+    data_y = np.array(data['label'])
+
+    # randomly shuffle data
+    np.random.seed(0)
+    rng_state = np.random.get_state()
+    np.random.shuffle(data_x)
+    np.random.set_state(rng_state)
+    np.random.shuffle(data_y)
+
+    data_x = _process_x(data_x, maxlen)
+    local_data = TensorDataset(torch.Tensor(data_x), torch.Tensor(data_y))
+
+    return local_data
 
 
 def _process_x(raw_x_batch, maxlen=400):

@@ -1,1 +1,3 @@
 wandb
+h5py
+scikit-learn

@@ -10,7 +10,7 @@ try:
     import wandb
 except ModuleNotFoundError:
     AVAILABLE_WANDB = False
-
+    
 import torch
 import random
 
@@ -112,7 +112,8 @@ if __name__ == '__main__':
             name=f"{args.method}{args.comment}",
             config=args,
             dir='.',
-            save_code=True
+            save_code=True,
+            mode='offline'
         )
         wandb.run.log_code(".", include_fn=lambda x: 'src/' in x or 'main.py' in x)
 
@@ -136,8 +137,9 @@ if __name__ == '__main__':
 
     # set data
     data = load_data(args)
-    check_test_dist("Data distribuion of all test data", data)
+    # check_test_dist("Data distribuion of all test data", data)
     # check_test_dist_by_client("by_client", data)
+
     args.num_classes = data.num_classes
     args.total_num_client, args.test_num_clients = data.train_num_clients, data.test_num_clients
     dataset = data.dataset
