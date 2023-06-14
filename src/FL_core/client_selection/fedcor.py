@@ -43,7 +43,7 @@ class FedCor(ClientSelection):
         
         # 1: warmup phase, 2: finetuning phase (optional), 3: normal
         self.stage = 1
-        self.stage_names = ["WARMUP", "FINETUNE", "NARMAL"]
+        self.stage_names = ["WARMUP", "FINETUNE", "NORMAL"]
         
         self.iter_cnt = 0
         self.iter_cnt_per_stage = 0
@@ -55,12 +55,12 @@ class FedCor(ClientSelection):
 
     @property
     def warmup_end(self):
-        return self.stage == 1 and self.iter_cnt == (self.iteration1 * int(1/self.frac1))
+        return self.stage == 1 and self.iter_cnt >= self.iteration1
 
     @property
     def finetune_end(self):
         assert self.finetuning
-        return self.stage == 2 and self.iter_cnt == (self.iteration1 * int(1/self.frac1) + self.rounds1)
+        return self.stage == 2 and self.iter_cnt >= (self.iteration1 + self.rounds1)
     
     @property
     def total_round_num(self):
@@ -190,10 +190,11 @@ class FedCor(ClientSelection):
         relabel_idx = (-client_loss_array).argsort()[:int(self.train_sizes[idx] * self.estimated_noisy_level[idx] * self.relabel_ratio)]
         relabel_idx = list(set(np.where(np.max(client_output_array, axis=1) > self.confidence_thres)[0]) & set(relabel_idx))
         
-        ### TODO (huhanpeng): why to update the training dataset
-        y_train_noisy_new = np.array(dataset_train.targets)
-        y_train_noisy_new[sample_idx[relabel_idx]] = np.argmax(client_output_array, axis=1)[relabel_idx]
-        dataset_train.targets = y_train_noisy_new
+        # ### TODO (huhanpeng): why do we need to update the training dataset
+        raise NotImplementedError()
+        # y_train_noisy_new = np.array(dataset_train.targets)
+        # y_train_noisy_new[sample_idx[relabel_idx]] = np.argmax(client_output_array, axis=1)[relabel_idx]
+        # dataset_train.targets = y_train_noisy_new
     
     def end_finetune(self):
         self.iter_cnt_per_stage = 0
