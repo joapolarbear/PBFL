@@ -31,7 +31,7 @@ class Client(object):
         self.labeled_data = local_train_data  # train_data
 
 
-    def train(self, global_model):
+    def train(self, global_model, mu=0):
         """
         train each client
         ---
@@ -47,7 +47,7 @@ class Client(object):
         if self.num_epoch == 0:  # no SGD updates
             result = self.trainer.train_E0(self.labeled_data)
         else:
-            result = self.trainer.train(self.labeled_data)
+            result = self.trainer.train(self.labeled_data, mu=mu, global_model=global_model)
         #result['model'] = self.trainer.get_model()
 
         # total loss / sqrt (# of local data)
@@ -66,6 +66,16 @@ class Client(object):
         else:
             # test on test dataset
             result = self.trainer.test(model, self.test_data)
+        return result
+
+    def elementwise_test(self, model, test_on_training_data=False):
+        # TEST
+        if test_on_training_data:
+            # test on training dataset
+            result = self.trainer.elementwise_test(model, self.labeled_data)
+        else:
+            # test on test dataset
+            result = self.trainer.elementwise_test(model, self.test_data)
         return result
 
     def get_client_idx(self):

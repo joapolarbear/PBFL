@@ -92,6 +92,8 @@ def client_selection_method(args):
         return GradNorm(**kwargs)
     elif args.method == 'PBFL':
         return Proj_Bandit(**kwargs)
+    elif args.method == "FedCor":
+        return FedCor(args, **kwargs)
     else:
         raise('CHECK THE NAME OF YOUR SELECTION METHOD')
 

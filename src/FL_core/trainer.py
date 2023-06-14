@@ -29,6 +29,7 @@ class Trainer:
         self.num_updates = args.num_updates  # num of local updates u
         self.batch_size = args.batch_size  # local batch size B
         self.loader_kwargs = {'batch_size': self.batch_size, 'pin_memory': True, 'shuffle': True}
+        self.args = args
 
         # model
         self.model = None
@@ -54,7 +55,7 @@ class Trainer:
     def clear_model(self):
         self.model = None
 
-    def train(self, data):
+    def train(self, data, mu=0, global_model=None):
         """
         train
         ---
@@ -92,6 +93,15 @@ class Trainer:
 
                 loss = criterion(output, labels.long())
 
+                if self.args.beta > 0 and mu > 0:
+                    if num_update > 0:
+                        print(f"FedCor trainer: mu={mu}, beta={self.args.beta}")
+                        w_diff = torch.tensor(0.).to(self.device)
+                        for w, w_t in zip(global_model.parameters(), self.model.parameters()):
+                            w_diff += torch.pow(torch.norm(w - w_t), 2)
+                        w_diff = torch.sqrt(w_diff)
+                        loss += self.args.beta * mu * w_diff
+
                 loss.backward()
                 optimizer.step()
 
@@ -99,7 +109,6 @@ class Trainer:
                 
                 correct += preds.eq(labels).sum().detach().cpu().data.numpy()
                 total += input.size(0)
-
 
                 if self.num_updates is not None and num_update + 1 == self.num_updates:
                     if total < self.batch_size:
@@ -219,3 +228,41 @@ class Trainer:
         #    result['auc'] = auc
 
         return result
+    
+    def elementwise_test(self, model, data, ema=False):
+        """
+        forward pass
+        ---
+        Args
+            model: model for test
+            data: dataset for test
+        Returns
+            elementwise output and loss
+        """
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        
+        _kwargs = {'batch_size': self.batch_size, 'pin_memory': True, 'shuffle': False}
+        dataloader = DataLoader(data, **_kwargs)
+        
+        model = model.to(self.device)
+        model.eval()
+        
+        criterion = nn.CrossEntropyLoss(reduction='none')
+
+        with torch.no_grad():
+            test_loss, correct, total = 0., 0, 0
+            y_true, y_score = np.empty((0)), np.empty((0))
+            output_lst, res_lst = torch.empty((0, self.num_classes)), torch.empty((0, self.num_classes))
+
+            for i, (input, labels) in enumerate(dataloader):
+                input, labels = input.to(self.device), labels.to(self.device)
+                output = model(input)
+                loss = criterion(output, labels.long())
+                if i == 0:
+                    output_whole = np.array(output.cpu())
+                    loss_whole = np.array(loss.cpu())
+                else:
+                    output_whole = np.concatenate((output_whole, output.cpu()), axis=0)
+                    loss_whole = np.concatenate((loss_whole, loss.cpu()), axis=0)       
+        return output_whole, loss_whole

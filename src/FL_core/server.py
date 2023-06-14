@@ -125,7 +125,7 @@ class Server(object):
         """
         ## ITER COMMUNICATION ROUND
         for round_idx in range(self.total_round):
-            print(f'\n>> ROUND {round_idx}')
+            print(f'\n> ROUND {round_idx}')
 
             ## GET GLOBAL MODEL
             #self.global_model = self.trainer.get_model()
@@ -134,7 +134,7 @@ class Server(object):
             # set clients
             client_indices = [*range(self.total_num_client)]
             if self.num_available is not None:
-                print(f'> available clients {self.num_available}/{len(client_indices)}')
+                print(f'>> available clients {self.num_available}/{len(client_indices)}')
                 np.random.seed(self.args.seed + round_idx)
                 client_indices = np.random.choice(client_indices, self.num_available, replace=False)
                 self.save_selected_clients(round_idx, client_indices)
@@ -142,7 +142,7 @@ class Server(object):
             # set client selection methods
             # initialize selection methods by setting given global model
             if self.args.method in NEED_INIT_METHOD:
-                if self.args.method in ["PBFL", "DivFL"]:
+                if self.args.method in ["PBFL", "DivFL", "FedCor"]:
                     self.selection_method.init(self.global_model)
                 else:
                     raise NotImplementedError("We do not maintain a cost model for each client, "
@@ -154,9 +154,8 @@ class Server(object):
             # candidate client selection before local training
             if self.args.method in CANDIDATE_SELECTION_METHOD:
                 # np.random.seed((self.args.seed+1)*10000000 + round_idx)
-                print(f'> candidate client selection {self.args.num_candidates}/{len(client_indices)}')
+                print(f'>> candidate client selection {self.args.num_candidates}/{len(client_indices)}')
                 client_indices = self.selection_method.select_candidates(client_indices, self.args.num_candidates)
-
 
             ## PRE-CLIENT SELECTION
             # client selection before local training (for efficiency)
@@ -170,19 +169,25 @@ class Server(object):
                     num_before = len(client_indices)
                     client_indices = self.selection_method.select(**kwargs, metric=None)
                     # del local_models
-                    print(f'> pre-client selection {len(client_indices)}/{num_before}')
+                    print(f'>> Pre-client selection {len(client_indices)}/{num_before}')
+                elif self.args.method == "FedCor":
+                    num_before = len(client_indices)
+                    client_indices = self.selection_method.select()
+                    print(f'>> Pre-client selection {len(client_indices)}/{num_before}')
                 else:
-                    print(f'> pre-client selection {self.num_clients_per_round}/{len(client_indices)}')
                     client_indices = self.selection_method.select(self.num_clients_per_round, client_indices, None)
-                print(f'selected clients: {sorted(client_indices)[:10]} ... ')
+                    print(f'>> Pre-client selection {len(client_indices)}/{len(client_indices)}')
+                print(f'   selected clients: {sorted(client_indices)[:10]} ... ')
 
             ## CLIENT UPDATE (TRAINING)
             engated_client_indices = deepcopy(client_indices)
+            
+            ### TODO huhanpeng: add a L2(M_local-M_global) to the loss function
             local_losses, accuracy, local_metrics = self.train_clients(client_indices)
 
-            ## CLIENT SELECTION
+            ## POST-CLIENT SELECTION
             if self.args.method not in PRE_SELECTION_METHOD:
-                print(f'> post-client selection {self.num_clients_per_round}/{len(client_indices)}')
+                print(f'>> post-client selection {self.num_clients_per_round}/{len(client_indices)}')
                 kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
                 kwargs['results'] = self.files['prob'] if self.save_probs else None
                 # select by local models(gradients)
@@ -208,10 +213,10 @@ class Server(object):
 
             ## SERVER AGGREGATION
             # DEBUGGING
-            if self.args.method != "PBFL":
+            if self.args.method not in ["PBFL", "FedCor"]:
                 assert len(client_indices) == self.num_clients_per_round, \
                     (len(client_indices), self.num_clients_per_round)
-
+                        
             # aggregate local models
             local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
             if self.args.fed_algo == 'FedAvg':
@@ -221,7 +226,35 @@ class Server(object):
             
             # update aggregated model to global model
             self.global_model.load_state_dict(global_model_params)
-
+            
+            if self.args.method == "FedCor":
+                if self.selection_method.stage == 1:
+                    ### warmup phase
+                    for client_id in engated_client_indices:
+                        client = self.client_list[client_id]
+                        output_array, loss_array = client.elementwise_test(self.global_model, test_on_training_data=True)
+                        self.selection_method.warmup_sub_iter_summary(client_id, output_array, loss_array)
+                    
+                    if self.selection_method.warmup_iter_end:
+                        self.selection_method.warmup_iter_summary()
+                        if self.selection_method.correction:
+                            for idx in self.noisy_set:
+                                client = self.client_list[idx]
+                                output_array, loss_array = client.elementwise_test(self.global_model, test_on_training_data=True)
+                                self.selection_method.correct_dataset(idx, output_array, loss_array)
+                elif self.selection_method.stage == 2:
+                    if self.selection_method.finetune_end:
+                        if self.selection_method.correction:
+                            for idx in self.noisy_set:
+                                client = self.client_list[idx]
+                                output_array, loss_array = client.elementwise_test(self.global_model, test_on_training_data=True)
+                                self.selection_method.correct_dataset(idx, output_array, loss_array)
+                        self.selection_method.end_finetune()
+                elif self.selection_method.stage == 3:
+                    pass
+                else:
+                    raise
+                    
             ## TEST
             # if round_idx % self.args.test_freq == 0:
             self.global_model.eval()
@@ -242,7 +275,11 @@ class Server(object):
             self.record[f'{phase}/Acc'] = result["acc"]
             status = 'ALL'
 
-            print('> {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, result["loss"], result["acc"]))
+            if self.args.method == "FedCor":
+                print('>> [{}] {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(
+                    self.selection_method.stage_name, status, phase, result["loss"], result["acc"]))
+            else:
+                print('>> {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, result["loss"], result["acc"]))
 
             if self.args.wandb:
                 wandb.log(self.record)
@@ -268,7 +305,12 @@ class Server(object):
         client = self.client_list[client_idx]
         if self.args.method in LOSS_THRESHOLD:
             client.trainer.update_ltr(self.ltr)
-        result = client.train(self.global_model)
+        
+        if self.args.method == "FedCor":
+            mu = self.selection_method.get_mu(client_idx)
+            result = client.train(self.global_model, mu=mu)
+        else:
+            result = client.train(self.global_model)
         return result
 
     def local_testing(self, client_idx):
@@ -392,7 +434,7 @@ class Server(object):
         self.record[f'{phase}/Acc'] = acc
         status = num_clients if phase == 'Train' else 'ALL'
 
-        print('> {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, loss, acc))
+        print('   {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, loss, acc))
 
         if phase == 'Test':
             if self.args.wandb:
@@ -451,7 +493,7 @@ def progressBar(idx, total, result, phase='Train', bar_length=20):
     arrow = '=' * int(round(percent * bar_length) - 1) + '>'
     spaces = ' ' * (bar_length - len(arrow))
 
-    sys.stdout.write("\r> Client {}ing: [{}] {}% ({}/{}) Loss {:.6f} Acc {:.4f}".format(
+    sys.stdout.write("\r>> Client {}ing: [{}] {}% ({}/{}) Loss {:.6f} Acc {:.4f}".format(
         phase, arrow + spaces, int(round(percent * 100)), idx, total, result['loss'], result['acc'])
     )
     sys.stdout.flush()

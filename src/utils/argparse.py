@@ -1,7 +1,7 @@
 import argparse
 
 ALL_METHODS = [
-    'Random', 'Cluster1', 'Cluster2', 'Pow-d', 'AFL', 'DivFL', 'GradNorm','PBFL'
+    'Random', 'Cluster1', 'Cluster2', 'Pow-d', 'AFL', 'DivFL', 'GradNorm','PBFL', "FedCor"
 ]
 
 
