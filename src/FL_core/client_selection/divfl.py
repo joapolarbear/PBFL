@@ -238,7 +238,7 @@ class Proj_Bandit(ClientSelection):
         assert isinstance(self.client2proj, list) or isinstance(self.client2proj, np.ndarray)
         # assert len(self.client2proj) == num_of_client
 
-        alpha = a/750
+        alpha = a/800
         
         ucb = self.client2proj + alpha * np.sqrt(
             (2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
@@ -275,7 +275,7 @@ class Proj_Bandit(ClientSelection):
             metric: local_gradients
         '''
         # get clients' projected gradients
-        MAX_SELECTED_NUM = 1000
+        MAX_SELECTED_NUM = 500
         if self.warmup:
             self.warmup = True
             print(f"> PBFL warmup {self.client_update_cnt}")
