@@ -21,8 +21,9 @@ from FL_core.client_selection import *
 from FL_core.federated_algorithm import *
 from utils import utils
 from utils.argparse import get_args
+import utils
 
-
+utils.init(".", "pbfl")
 
 def load_data(args):
     if args.dataset == 'Reddit':
@@ -120,7 +121,7 @@ if __name__ == '__main__':
         wandb.run.log_code(".", include_fn=lambda x: 'src/' in x or 'main.py' in x)
 
     # fix seed
-    if args.fix_seed:
+    if True or args.fix_seed:
         random.seed(args.seed)
         np.random.seed(args.seed)
         torch.manual_seed(args.seed)
@@ -144,7 +145,10 @@ if __name__ == '__main__':
 
     args.num_classes = data.num_classes
     args.total_num_client, args.test_num_clients = data.train_num_clients, data.test_num_clients
+    utils.logger.warn("data.test_num_clients will be deprecated")
+    assert args.total_num_client == args.test_num_clients
     dataset = data.dataset
+    raise
 
     # set model
     model = create_model(args)
