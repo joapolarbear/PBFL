@@ -6,6 +6,8 @@ import torch
 from torch.utils.data import TensorDataset
 import json
 
+import utils
+
 
 class FederatedEMNISTDataset_nonIID:
     def __init__(self, data_dir, args):
@@ -19,10 +21,10 @@ class FederatedEMNISTDataset_nonIID:
         self.test_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
 
         self._init_data(data_dir)
-        print(f'Total number of users: {self.train_num_clients}')
+        utils.logger.info(f'Total number of users: {self.train_num_clients}')
         self.train_num_clients = len(self.dataset['train']['data_sizes'].keys())
         self.test_num_clients = len(self.dataset['test']['data_sizes'].keys())
-        print(f'#TrainClients {self.train_num_clients} #TestClients {self.test_num_clients}')
+        utils.logger.info(f'#TrainClients {self.train_num_clients} #TestClients {self.test_num_clients}')
         # 3383
 
     def _init_data(self, data_dir):
@@ -39,64 +41,58 @@ class FederatedEMNISTDataset_nonIID:
         self.dataset = dataset
 
 
+def _load_data(_dir):
+    # Load the JSON file
+    with open(_dir, 'r') as f:
+        _data = json.load(f)
+    # Convert the data to NumPy arrays
+    num_samples = np.array(_data['num_samples']) # 
+    user_names = np.array(_data['users']) # user_names corresponding to the array of num_samples
+    _user2data = _data['user_data'] # {user_name: {'x': x, 'y': y}}
+    _ids = list(_data['user_data'].keys())
+    _num_clients = len(_ids)
+    return _user2data, _ids, _num_clients
+
+def _register_data(_user_data: dict, _data_local_dict: dict, _data_local_num_dict: dict,
+                               client_idx: int, client_name: str, new_idx: int, min_num_samples: int, is_train: bool):
+    data_x = np.expand_dims(_user_data[client_name]['x'], axis=1)
+    data_y = _user_data[client_name]['y']
+
+    if is_train:
+        if len(data_x) < min_num_samples:
+            return False
+        data_x = data_x[:min_num_samples]
+        data_y = data_y[:min_num_samples]
+
+    dim1, dim2, _ = data_x.shape
+    data_x = data_x.reshape(dim1, dim2, 28, 28)
+    local_data = TensorDataset(torch.Tensor(data_x), torch.Tensor(data_y))
+    _data_local_dict[new_idx] = local_data
+    _data_local_num_dict[new_idx] = len(data_x)
+    
+    if not is_train and len(data_x) == 0:
+        utils.logger.info(f"No test data for client {client_idx}")
+    
+    return True
+
 def preprocess(data_dir, min_num_samples):
     train_data_local_dict, train_data_local_num_dict = {}, {}
     test_data_local_dict, test_data_local_num_dict = {}, {}
 
     if True:
-        # Load the JSON file
-        with open('../dataset/FederatedEMNIST/mytrain.json', 'r') as f:
-            train_data = json.load(f)
-        # Convert the data to NumPy arrays
-        num_samples = np.array(train_data['num_samples']) # 
-        user_names = np.array(train_data['users']) # user_names corresponding to the array of num_samples
-        user_data = train_data['user_data'] # {user_name: {'x': x, 'y': y}}
+        train_data, train_ids, num_clients_train = _load_data('../dataset/FederatedEMNIST/mytrain.json')
+        test_data, test_ids, num_clients_test = _load_data('../dataset/FederatedEMNIST/mytest.json')
 
-        with open('../dataset/FederatedEMNIST/mytest.json', 'r') as f:
-            test_data = json.load(f)
-        # Convert the data to NumPy arrays
-        num_samples = np.array(test_data['num_samples']) # 
-        user_names = np.array(test_data['users']) # user_names corresponding to the array of num_samples
-        user_data = test_data['user_data'] # {user_name: {'x': x, 'y': y}}
-
-        train_ids = list(train_data['user_data'].keys())
-
-        test_ids = list(test_data['user_data'].keys())
-        num_clients_train = len(train_ids)
-        num_clients_test = len(test_ids)
-        print(f'#TrainClients {num_clients_train} #TestClients {num_clients_test}')
+        utils.logger.info(f'#TrainClients {num_clients_train} #TestCli`ents {num_clients_test}')
 
         idx = 0
-        for client_idx in range(num_clients_train):
-            client_id = train_ids[client_idx]
-
-
-            # train
-            train_x = np.expand_dims(train_data['user_data'][client_id]['x'], axis=1)
-            train_y = train_data['user_data'][client_id]['y']
-
-            if len(train_x) < min_num_samples:
+        for client_idx, client_name in enumerate(train_ids):
+            succ = _register_data(train_data, train_data_local_dict, train_data_local_num_dict,
+                client_idx, client_name, idx, min_num_samples, is_train=True)
+            if not succ:
                 continue
-            train_x = train_x[:min_num_samples]
-            train_y = train_y[:min_num_samples]
-
-            dim1, dim2, _ = train_x.shape
-            train_x = train_x.reshape(dim1, dim2, 28, 28)
-
-            local_data = TensorDataset(torch.Tensor(train_x), torch.Tensor(train_y))
-            train_data_local_dict[idx] = local_data
-            train_data_local_num_dict[idx] = len(train_x)
-
-            # test
-            test_x = np.expand_dims(test_data['user_data'][client_id]['x'], axis=1)
-            dim1, dim2, _ = test_x.shape
-            test_x = test_x.reshape(dim1, dim2, 28, 28)
-            test_y = test_data['user_data'][client_id]['y']
-            local_data = TensorDataset(torch.Tensor(test_x), torch.Tensor(test_y))
-            test_data_local_dict[idx] = local_data
-            test_data_local_num_dict[idx] = len(test_x)
-            if len(test_x) == 0:
-                print(client_idx)
+            _register_data(test_data, test_data_local_dict, test_data_local_num_dict,
+                client_idx, client_name, idx, min_num_samples, is_train=False)
             idx += 1
     else:
         train_data = h5py.File(os.path.join(data_dir, 'fed_emnist_train.h5'), 'r')
@@ -108,7 +104,7 @@ def preprocess(data_dir, min_num_samples):
         test_ids = list(test_data['examples'].keys())
         num_clients_train = len(train_ids) if num_clients is None else num_clients
         num_clients_test = len(test_ids) if num_clients is None else num_clients
-        print(f'num_clients_train {num_clients_train} num_clients_test {num_clients_test}')
+        utils.logger.info(f'num_clients_train {num_clients_train} num_clients_test {num_clients_test}')
 
         # local dataset
         train_data_local_dict, train_data_local_num_dict = {}, {}
