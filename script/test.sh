@@ -4,11 +4,11 @@
 # src/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.001 -B 50 -R 1000 --method PBFL --comment ucb0to4/5
 # src/main.py --dataset FederatedEMNIST_nonIID --method PBFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 500
 MODEL=CNN
-BATCH_SIZE=20
+BATCH_SIZE=10
 TRAIN_ROUND=500
 NUM_CLIENT_PER_ROUND=10
 TOTAL_CLIENT_NUM=200
-DATASET=FederatedEMNIST_nonIID
+DATASET=FederatedEMNIST
 
 # METHODS=(Random)
 METHODS=(PBFL)

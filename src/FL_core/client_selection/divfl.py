@@ -275,7 +275,7 @@ class Proj_Bandit(ClientSelection):
             metric: local_gradients
         '''
         # get clients' projected gradients
-        MAX_SELECTED_NUM = 500
+        MAX_SELECTED_NUM = 100
         if self.warmup:
             self.warmup = True
             print(f"> PBFL warmup {self.client_update_cnt}")
