@@ -11,7 +11,7 @@ from .partitioned_cifar10 import PartitionedCIFAR10Dataset
 from .federated_emnist_iid import FederatedEMNISTDatasetIID
 from .federated_emnist_noniid import FederatedEMNISTDataset_nonIID
 
-from .fedcor.utils import get_dataset
+from fedcor.utils import get_dataset
 
 from .base_dataset import BaseDataset
 
@@ -45,6 +45,7 @@ def load_data(args):
             test_data_local_num_dict[client_idx] = len(data_x)
         
         dataset = BaseDataset()
+        dataset.num_classes = 10
         dataset.dataset['train'] = {
             'data_sizes': train_data_local_num_dict,
             'data': train_data_local_dict,

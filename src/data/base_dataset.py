@@ -32,6 +32,23 @@ class BaseDataset:
     def __init__(self):
         self.num_classes = None
         self.dataset = {}
+        self._input_shape = None
+    
+    @property
+    def train_num_clients(self):
+        return len(self.dataset['train']['data_sizes'])
+    
+    @property
+    def test_num_clients(self):
+        return len(self.dataset['test']['data_sizes'])
+    
+    @property
+    def input_shape(self):
+        if self._input_shape is None:
+            test_data_local_dict: dict = self.dataset["test"]["data"]
+            x, y = list(test_data_local_dict.values())[0].tensors
+            self._input_shape = x.shape
+        return self._input_shape
     
     def check_test_dist(self, name, dataset = None):
         _dataset = dataset or self.dataset
@@ -42,7 +59,7 @@ class BaseDataset:
             labels_list.append(y)
         lables = torch.cat(labels_list, dim=0)
         rst = _label_to_distribution(lables)
-        print(f"{name}, len={len(lables)}, distribution: {_distribution_str(rst)}")
+        print(f"{name}, len={len(lables)}, Test Dist: {_distribution_str(rst)}")
 
     def check_test_dist_by_client(self, name, dataset = None):
         _dataset = dataset or self.dataset
@@ -51,7 +68,7 @@ class BaseDataset:
             x, y = local_data.tensors
             lables = [int(e) for e in y]
             rst = _label_to_distribution(lables)
-            print(f"{name}_{client_id}, distribution: {_distribution_str(rst)}")
+            print(f"{name}_{client_id:03d}, Test Dist: {_distribution_str(rst)}")
 
  
 

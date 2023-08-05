@@ -41,10 +41,6 @@ class CelebADataset(BaseDataset):
         
         self.dataset = dataset
 
-        self.train_num_clients = len(dataset["train"]["data_sizes"])
-        self.test_num_clients = len(dataset["test"]["data_sizes"]) 
-
-
 
 def preprocess(data_dir, img_size=84):
     img_dir = os.path.join(data_dir,'raw/img_align_celeba')

@@ -14,37 +14,15 @@ except ModuleNotFoundError:
 import torch
 import random
 
-from data import *
-from model import *
+from data import load_data
+from model import create_model
 from FL_core.server import Server
 from FL_core.client_selection import *
 from FL_core.federated_algorithm import *
-from utils import utils
 from utils.argparse import get_args
 import utils
 
 utils.init(".", "pbfl")
-
-def create_model(args):
-    if args.dataset == 'Reddit' and args.model == 'BLSTM':
-        model = BLSTM(vocab_size=args.maxlen, num_classes=args.num_classes)
-    elif args.dataset == 'FederatedEMNIST_nonIID' and args.model == 'CNN':
-        model = CNN_DropOut(True)
-    elif args.dataset == 'FederatedEMNIST_nonIID' and args.model == 'CNN':
-        model = CNN_DropOut(True)
-    elif 'FederatedEMNIST' in args.dataset and args.model == 'CNN':
-        model = CNN_DropOut(False)
-    elif args.dataset == 'FedCIFAR100' and args.model == 'ResNet':
-        model = resnet18(num_classes=args.num_classes, group_norm=args.num_gn)  # ResNet18+GN
-    elif args.dataset == 'CelebA' and args.model == 'CNN':
-        model = ModelCNNCeleba()
-    elif args.dataset == 'PartitionedCIFAR10':
-        model = CNN_CIFAR_dropout()
-
-    model = model.to(args.device)
-    if args.parallel:
-        model = torch.nn.DataParallel(model, output_device=0)
-    return model
 
 
 def federated_algorithm(dataset, model, args):
@@ -131,10 +109,9 @@ if __name__ == '__main__':
     utils.logger.warn("data.test_num_clients will be deprecated")
     assert args.total_num_client == args.test_num_clients
     dataset = data.dataset
-    raise
 
     # set model
-    model = create_model(args)
+    model = create_model(args, data.input_shape)
     client_selection = client_selection_method(args)
     fed_algo = federated_algorithm(dataset, model, args)
 

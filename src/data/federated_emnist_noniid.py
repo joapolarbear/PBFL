@@ -19,13 +19,8 @@ class FederatedEMNISTDataset_nonIID(BaseDataset):
         super(FederatedEMNISTDataset_nonIID, self).__init__()
         self.num_classes = 10
         self.min_num_samples = 10
-        self.train_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
-        self.test_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
 
         self._init_data(data_dir)
-        utils.logger.info(f'Total number of users: {self.train_num_clients}')
-        self.train_num_clients = len(self.dataset['train']['data_sizes'].keys())
-        self.test_num_clients = len(self.dataset['test']['data_sizes'].keys())
         utils.logger.info(f'#TrainClients {self.train_num_clients} #TestClients {self.test_num_clients}')
         # 3383
 

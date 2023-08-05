@@ -12,7 +12,9 @@ def get_args():
                         # choices=['Reddit','FederatedEMNIST','FedCIFAR100','CelebA', 'PartitionedCIFAR10', 'FederatedEMNIST_IID', 'FederatedEMNIST_nonIID']
                         )
     parser.add_argument('--data_dir', type=str, default='../dataset/FederatedEMNIST', help='dataset directory')
-    parser.add_argument('--model', type=str, default='CNN', help='model', choices=['BLSTM','CNN','ResNet'])
+    parser.add_argument('--model', type=str, default='CNN', help='model',
+        # choices=['BLSTM','CNN','ResNet']
+    )
     parser.add_argument('--method', type=str, default='Random', help='client selection',
                         choices=ALL_METHODS)
     parser.add_argument('--fed_algo', type=str, default='FedAvg', help='Federated algorithm for aggregation',
@@ -59,6 +61,18 @@ def get_args():
                         help='splitting points (epoch number) for multiple episodes of training')
     parser.add_argument('--maxlen', type=int, default=400, help='maxlen for NLP dataset')
 
+    # Additional model arguments for models in FedCor
+    parser.add_argument('--kernel_sizes', type=int, default=[3, 3, 3],nargs="*",
+                        help='kernel size in each convolutional layer')
+    parser.add_argument('--num_filters', type=int, default=[32, 64, 64],nargs = "*",
+                        help="number of filters in each convolutional layer.")
+    parser.add_argument('--padding', action='store_true', 
+                        help='use padding in each convolutional layer')
+    parser.add_argument('--mlp_layers',type= int,default=[64,],nargs="*",
+                        help="numbers of dimensions of each hidden layer in MLP, or fc layers in CNN")
+    parser.add_argument('--depth',type = int,default = 20, 
+                        help = "The depth of ResNet. Only valid when model is resnet")
+    
     # experiment setting
     parser.add_argument('--fix_seed', action='store_true', default=False, help='fix random seed')
     parser.add_argument('--seed', type=int, default=0, help='seed')

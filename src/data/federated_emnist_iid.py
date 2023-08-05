@@ -20,8 +20,6 @@ class FederatedEMNISTDatasetIID(BaseDataset):
         # min_num_samples = 100; num_clients = 
 
         self._init_data(data_dir)
-        self.train_num_clients = len(self.dataset['train']['data_sizes'].keys())
-        self.test_num_clients = len(self.dataset['test']['data_sizes'].keys())
         print(f'#TrainClients {self.train_num_clients} #TestClients {self.test_num_clients}')
 
     def _init_data(self, data_dir):
