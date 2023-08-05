@@ -1,0 +1,3 @@
+[submodule "3rdparty/FedCor"]
+	path = 3rdparty/FedCor
+	url = https://github.com/joapolarbear/FedCor.git
