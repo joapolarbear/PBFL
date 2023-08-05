@@ -11,41 +11,66 @@ from .partitioned_cifar10 import PartitionedCIFAR10Dataset
 from .federated_emnist_iid import FederatedEMNISTDatasetIID
 from .federated_emnist_noniid import FederatedEMNISTDataset_nonIID
 
-def _label_to_distribution(_labels):
-    if isinstance(_labels, torch.Tensor):
-        _labels = _labels.detach().numpy().astype(int)
-    cnt = np.array(np.unique(_labels, return_counts=True)).T # of shape (N_sample, 2), values and its counts
-    rst = np.zeros(np.max(_labels)+1, dtype=int)
-    rst[cnt[:, 0]] = cnt[:, 1]
-    return rst
+from .fedcor.utils import get_dataset
 
-def _distribution_str(dist: list, max_width = 3):
-    _max = max(dist)
-    assert _max < 10 ** (max_width + 1)
-    return "|".join(["_" * max_width if c == 0 else "_" * (max_width-len(str(c))) + str(c) for c in dist])
-    
-    
-    
-def check_test_dist(name, dataset):
-    _dataset = dataset.dataset
-    test_data_local_dict: dict = _dataset["test"]["data"]
-    labels_list = []
-    for client_id, local_data in test_data_local_dict.items():
-        x, y = local_data.tensors
-        labels_list.append(y)
-    lables = torch.cat(labels_list, dim=0)
-    rst = _label_to_distribution(lables)
-    print(f"{name}, len={len(lables)}, distribution: {_distribution_str(rst)}")
+from .base_dataset import BaseDataset
 
-def check_test_dist_by_client(name, dataset):
-    _dataset = dataset.dataset
-    test_data_local_dict: dict = _dataset["test"]["data"]
-    for client_id, local_data in test_data_local_dict.items():
-        x, y = local_data.tensors
-        lables = [int(e) for e in y]
-        rst = _label_to_distribution(lables)
-        print(f"{name}_{client_id}, distribution: {_distribution_str(rst)}")
+
+def load_data(args):
+    if args.dataset in ["cifar", "mnist", "fmnist"]:
+        args.num_users = args.total_num_clients
+        args.iid = True
+        args.alpha = args.dirichlet_alpha
+        args.unequal =  False
+        
+        train_dataset, test_dataset, user_groups, user_groups_test, \
+            weights = get_dataset(args, seed=None)
+            
+        assert len(user_groups) == len(user_groups_test)
+
+        train_data_local_dict, train_data_local_num_dict = {}, {}
+        test_data_local_dict, test_data_local_num_dict = {}, {}
+        for client_idx in range(args.num_users):
+           
+            data_idxs: set = user_groups[client_idx]
+            data_x, data_y = zip(*[train_dataset[i] for i in data_idxs])
+            local_data = TensorDataset(torch.stack(data_x), torch.Tensor(data_y))
+            train_data_local_dict[client_idx] = local_data
+            train_data_local_num_dict[client_idx] = len(data_x)
+            
+            data_idxs: set = user_groups_test[client_idx]
+            data_x, data_y = zip(*[test_dataset[i] for i in data_idxs])
+            local_data = TensorDataset(torch.stack(data_x), torch.Tensor(data_y))
+            test_data_local_dict[client_idx] = local_data
+            test_data_local_num_dict[client_idx] = len(data_x)
+        
+        dataset = BaseDataset()
+        dataset.dataset['train'] = {
+            'data_sizes': train_data_local_num_dict,
+            'data': train_data_local_dict,
+        }
+        dataset.dataset['test'] = {
+            'data_sizes': test_data_local_num_dict,
+            'data': test_data_local_dict,
+        }
+        return dataset
+        
+    elif args.dataset == 'Reddit':
+        return RedditDataset(args.data_dir, args)
+    elif args.dataset == 'FederatedEMNIST':
+        return FederatedEMNISTDataset(args.data_dir, args)
+    elif args.dataset == 'FederatedEMNIST_IID':
+        return FederatedEMNISTDatasetIID(args.data_dir, args)
+    elif args.dataset == 'FederatedEMNIST_nonIID':
+        return FederatedEMNISTDataset_nonIID(args.data_dir, args)
+    elif args.dataset == 'FedCIFAR100':
+        return FederatedCIFAR100Dataset(args.data_dir, args)
+    elif args.dataset == 'CelebA':
+        return CelebADataset(args.data_dir, args)
+    elif args.dataset == 'PartitionedCIFAR10':
+        return PartitionedCIFAR10Dataset(args.data_dir, args)
 
 __all__ = ['FederatedEMNISTDataset', 'FederatedEMNISTDatasetIID', 'FederatedEMNISTDataset_nonIID',
             'FederatedCIFAR100Dataset', 'PartitionedCIFAR10Dataset', 'RedditDataset', 'CelebADataset',
-            'check_test_dist', 'check_test_dist_by_client']
+            'load_data']
+

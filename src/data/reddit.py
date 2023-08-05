@@ -9,9 +9,11 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset
 
+from .base_dataset import BaseDataset
 
-class RedditDataset:
+class RedditDataset(BaseDataset):
     def __init__(self, data_dir, args):
+        super(RedditDataset, self).__init__()
         self.num_classes = 2
         #self.train_size = 124638 # messages
         #self.test_size = 15568 # messages

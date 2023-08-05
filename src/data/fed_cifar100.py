@@ -12,9 +12,11 @@ import torch
 from torch.utils.data import TensorDataset
 import torchvision.transforms as T
 
+from .base_dataset import BaseDataset
 
-class FederatedCIFAR100Dataset:
+class FederatedCIFAR100Dataset(BaseDataset):
     def __init__(self, data_dir, args):
+        super(FederatedCIFAR100Dataset, self).__init__()
         self.num_classes = 100
         self.train_num_clients = 500
         self.test_num_clients = 100

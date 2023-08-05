@@ -9,11 +9,14 @@ import numpy as np
 import json
 from collections import defaultdict
 
+from .base_dataset import BaseDataset
 
 
 
-class CelebADataset(object):
+
+class CelebADataset(BaseDataset):
     def __init__(self, data_dir, args):
+        super(CelebA_ClientData, self).__init__()
         self.num_classes = 2
         self.min_num_samples = args.min_num_samples
         self.max_num_clients = args.total_num_clients

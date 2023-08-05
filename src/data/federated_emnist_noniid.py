@@ -8,13 +8,15 @@ import json
 
 import utils
 
+from .base_dataset import BaseDataset
 
-class FederatedEMNISTDataset_nonIID:
+class FederatedEMNISTDataset_nonIID(BaseDataset):
     def __init__(self, data_dir, args):
         '''
         known class: digits (10)
         unknown class: characters (52) -> label noise
         '''
+        super(FederatedEMNISTDataset_nonIID, self).__init__()
         self.num_classes = 10
         self.min_num_samples = 10
         self.train_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
@@ -55,6 +57,7 @@ def _load_data(_dir):
 
 def _register_data(_user_data: dict, _data_local_dict: dict, _data_local_num_dict: dict,
                                client_idx: int, client_name: str, new_idx: int, min_num_samples: int, is_train: bool):
+    import pdb; pdb.set_trace()
     data_x = np.expand_dims(_user_data[client_name]['x'], axis=1)
     data_y = _user_data[client_name]['y']
 

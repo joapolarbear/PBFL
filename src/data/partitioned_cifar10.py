@@ -9,13 +9,15 @@ import torch
 import numpy as np
 import os
 
+from .base_dataset import BaseDataset
 
 
-class PartitionedCIFAR10Dataset(object):
+class PartitionedCIFAR10Dataset(BaseDataset):
     def __init__(self, data_dir, args):
         '''
         partitioned CIFAR10 datatset according to a Dirichlet distribution
         '''
+        super(PartitionedCIFAR10Dataset, self).__init__()
         self.num_classes = 10
         self.train_num_clients = 100 if args.total_num_clients is None else args.total_num_clients
         self.test_num_clients = 100 if args.total_num_clients is None else args.total_num_clients

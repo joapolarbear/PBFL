@@ -3,3 +3,4 @@ results/
 wandb/
 *__pycache__/
 .log
+data

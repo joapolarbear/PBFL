@@ -9,9 +9,10 @@ import numpy as np
 import torch
 from torch.utils.data import TensorDataset
 
-
-class FederatedEMNISTDataset:
+from .base_dataset import BaseDataset
+class FederatedEMNISTDataset(BaseDataset):
     def __init__(self, data_dir, args):
+        super(FederatedEMNISTDataset, self).__init__()
         self.num_classes = 62
         self.train_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
         self.test_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients

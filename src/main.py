@@ -25,23 +25,6 @@ import utils
 
 utils.init(".", "pbfl")
 
-def load_data(args):
-    if args.dataset == 'Reddit':
-        return RedditDataset(args.data_dir, args)
-    elif args.dataset == 'FederatedEMNIST':
-        return FederatedEMNISTDataset(args.data_dir, args)
-    elif args.dataset == 'FederatedEMNIST_IID':
-        return FederatedEMNISTDatasetIID(args.data_dir, args)
-    elif args.dataset == 'FederatedEMNIST_nonIID':
-        return FederatedEMNISTDataset_nonIID(args.data_dir, args)
-    elif args.dataset == 'FedCIFAR100':
-        return FederatedCIFAR100Dataset(args.data_dir, args)
-    elif args.dataset == 'CelebA':
-        return CelebADataset(args.data_dir, args)
-    elif args.dataset == 'PartitionedCIFAR10':
-        return PartitionedCIFAR10Dataset(args.data_dir, args)
-
-
 def create_model(args):
     if args.dataset == 'Reddit' and args.model == 'BLSTM':
         model = BLSTM(vocab_size=args.maxlen, num_classes=args.num_classes)
@@ -140,8 +123,8 @@ if __name__ == '__main__':
 
     # set data
     data = load_data(args)
-    check_test_dist("Data distribuion of all test data", data)
-    check_test_dist_by_client("by_client", data)
+    data.check_test_dist("Data distribuion of all test data")
+    data.check_test_dist_by_client("by_client")
 
     args.num_classes = data.num_classes
     args.total_num_client, args.test_num_clients = data.train_num_clients, data.test_num_clients

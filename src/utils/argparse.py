@@ -9,7 +9,8 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu_id', type=str, default='0', help='gpu cuda index')
     parser.add_argument('--dataset', type=str, default='FederatedEMNIST', help='dataset',
-                        choices=['Reddit','FederatedEMNIST','FedCIFAR100','CelebA', 'PartitionedCIFAR10', 'FederatedEMNIST_IID', 'FederatedEMNIST_nonIID'])
+                        # choices=['Reddit','FederatedEMNIST','FedCIFAR100','CelebA', 'PartitionedCIFAR10', 'FederatedEMNIST_IID', 'FederatedEMNIST_nonIID']
+                        )
     parser.add_argument('--data_dir', type=str, default='../dataset/FederatedEMNIST', help='dataset directory')
     parser.add_argument('--model', type=str, default='CNN', help='model', choices=['BLSTM','CNN','ResNet'])
     parser.add_argument('--method', type=str, default='Random', help='client selection',
@@ -51,7 +52,7 @@ def get_args():
     parser.add_argument('--distance_type', type=str, default='L1', help='distance type for clustered sampling 2')
     parser.add_argument('--subset_ratio', type=float, default=0.1, help='subset size for DivFL')
 
-    parser.add_argument('--dirichlet_alpha', type=float, default=0.1, help='ratio of data partition from dirichlet distribution')
+    parser.add_argument('--dirichlet_alpha', type=float, default=None, help='ratio of data partition from dirichlet distribution')
     
     parser.add_argument('--min_num_samples', type=int, default=None, help='mininum number of samples')
     parser.add_argument('--schedule', type=int, nargs='+', default=[0, 5, 10, 15, 20, 30, 40, 60, 90, 140, 210, 300],
