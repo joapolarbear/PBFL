@@ -14,15 +14,18 @@ except ModuleNotFoundError:
 import torch
 import random
 
+import utils
+
+utils.init(".", "pbfl")
+
 from data import load_data
 from model import create_model
 from FL_core.server import Server
 from FL_core.client_selection import *
 from FL_core.federated_algorithm import *
-from utils.argparse import get_args
-import utils
 
-utils.init(".", "pbfl")
+from utils import logger
+from utils.argparse import get_args
 
 
 def federated_algorithm(dataset, model, args):
@@ -97,16 +100,17 @@ if __name__ == '__main__':
             os.environ["CUDA_VISIBLE_DEVICES"]=args.gpu_id
         args.device = torch.device(f"cuda:{args.gpu_id[0]}")
         torch.cuda.set_device(args.device)
-        print('Current cuda device ', torch.cuda.current_device())
+        logger.info('Current cuda device ', torch.cuda.current_device())
 
     # set data
     data = load_data(args)
+    # if input("Check distribution? [Y/n]: ").lower() in ["y", "yes"]:
     data.check_test_dist("Data distribuion of all test data")
     data.check_test_dist_by_client("by_client")
 
     args.num_classes = data.num_classes
     args.total_num_client, args.test_num_clients = data.train_num_clients, data.test_num_clients
-    utils.logger.warn("data.test_num_clients will be deprecated")
+    logger.warn("data.test_num_clients will be deprecated")
     assert args.total_num_client == args.test_num_clients
     dataset = data.dataset
 

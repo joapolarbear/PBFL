@@ -72,6 +72,12 @@ def get_args():
                         help="numbers of dimensions of each hidden layer in MLP, or fc layers in CNN")
     parser.add_argument('--depth',type = int,default = 20, 
                         help = "The depth of ResNet. Only valid when model is resnet")
+
+    # Additional arguments for data distribution
+    parser.add_argument('--iid', type=int, default=1,
+                        help='Default set to IID. Set to 0 for non-IID.')
+    parser.add_argument('--unequal', type=int, default=0,
+                        help='whether to use unbalanced data splits for non-i.i.d setting (use 0 for equal splits)')
     
     # experiment setting
     parser.add_argument('--fix_seed', action='store_true', default=False, help='fix random seed')

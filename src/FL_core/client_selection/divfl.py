@@ -12,7 +12,7 @@ from copy import deepcopy
 from tqdm import tqdm
 from itertools import product
 
-
+from utils import logger
 
 '''Diverse Client Selection'''
 class DivFL(ClientSelection):
@@ -278,7 +278,7 @@ class Proj_Bandit(ClientSelection):
         MAX_SELECTED_NUM = 100
         if self.warmup:
             self.warmup = True
-            print(f"> PBFL warmup {self.client_update_cnt}")
+            logger.info(f"> PBFL warmup {self.client_update_cnt}")
             st = self.client_update_cnt * MAX_SELECTED_NUM
             ed = st + MAX_SELECTED_NUM
             if ed >= self.total:

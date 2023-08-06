@@ -44,10 +44,11 @@ class BaseDataset:
     
     @property
     def input_shape(self):
+        ### Do NOT include the batch size dimension
         if self._input_shape is None:
             test_data_local_dict: dict = self.dataset["test"]["data"]
             x, y = list(test_data_local_dict.values())[0].tensors
-            self._input_shape = x.shape
+            self._input_shape = x.shape[1:]
         return self._input_shape
     
     def check_test_dist(self, name, dataset = None):

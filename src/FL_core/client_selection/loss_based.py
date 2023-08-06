@@ -4,7 +4,7 @@ import numpy as np
 
 from .client_selection import ClientSelection
 
-
+from utils import logger
 
 '''Active Federated Learning'''
 class ActiveFederatedLearning(ClientSelection):
@@ -33,7 +33,7 @@ class ActiveFederatedLearning(ClientSelection):
         not_selected = np.array(list(set(np.arange(len(metric))) - set(selected)))
         selected2 = np.random.choice(not_selected, n - num_select, replace=False)
         selected_client_idxs = np.append(selected, selected2, axis=0)
-        print(f'{len(selected_client_idxs)} selected users: {selected_client_idxs}')
+        logger.info(f'{len(selected_client_idxs)} selected users: {selected_client_idxs}')
 
         if self.save_probs:
             self.save_results(metric, results, f'{round},loss,')

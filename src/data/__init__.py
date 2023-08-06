@@ -1,7 +1,8 @@
-from collections import Counter
 import torch
 from torch.utils.data import TensorDataset
 import numpy as np
+import os
+import pickle
 
 from .federated_emnist import FederatedEMNISTDataset
 from .fed_cifar100 import FederatedCIFAR100Dataset
@@ -14,15 +15,26 @@ from .federated_emnist_noniid import FederatedEMNISTDataset_nonIID
 from fedcor.utils import get_dataset
 
 from .base_dataset import BaseDataset
-
+from utils import logger
 
 def load_data(args):
     if args.dataset in ["cifar", "mnist", "fmnist"]:
-        args.num_users = args.total_num_clients
-        args.iid = True
-        args.alpha = args.dirichlet_alpha
-        args.unequal =  False
         
+        args.num_users = args.total_num_clients
+        args.alpha = args.dirichlet_alpha
+
+        cache_path = os.path.join(args.data_dir,
+            f"{args.dataset}_N{args.num_users}_"
+            f"alpha{'-none' if args.alpha is None else args.alpha}_"
+            f"{'iid' if args.iid else 'noniid'}_"
+            f"{'eq' if not args.unequal else 'uneq'}.pickle")
+        if os.path.exists(cache_path):
+            with open(cache_path, 'rb') as fp:
+                dataset = pickle.load(fp)[0]
+            logger.info(f"Load cached dataset from {cache_path}")
+            return dataset
+
+        ### No cached data found
         train_dataset, test_dataset, user_groups, user_groups_test, \
             weights = get_dataset(args, seed=None)
             
@@ -54,6 +66,12 @@ def load_data(args):
             'data_sizes': test_data_local_num_dict,
             'data': test_data_local_dict,
         }
+
+        os.makedirs(args.data_dir, exist_ok=True)
+        with open(cache_path, 'wb') as fp:
+            pickle.dump([dataset], fp)
+            logger.info(f"Dump cached dataset at {cache_path}")
+
         return dataset
         
     elif args.dataset == 'Reddit':

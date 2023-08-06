@@ -81,7 +81,6 @@ class Trainer:
         
         for epoch in range(self.num_epoch):
             loss_lst = []
-            print(self.num_classes)
             output_lst, res_lst = torch.empty((0, self.num_classes)).to(self.device), torch.empty((0, self.num_classes)).to(self.device)
             min_loss, num_ot = np.inf, 0
             train_loss, correct, total = 0., 0, 0

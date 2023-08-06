@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import copy
 from scipy.spatial.distance import cdist
 
+from utils import logger
 
 def add_noise(args, y_train, dict_users):
     np.random.seed(args.seed)
@@ -22,7 +23,7 @@ def add_noise(args, y_train, dict_users):
         noisy_idx = np.where(prob <= gamma_c[i])[0]
         y_train_noisy[sample_idx[noisy_idx]] = np.random.randint(0, 10, len(noisy_idx))
         noise_ratio = np.mean(y_train[sample_idx] != y_train_noisy[sample_idx])
-        print("Client %d, noise level: %.4f (%.4f), real noise ratio: %.4f" % (
+        logger.info("Client %d, noise level: %.4f (%.4f), real noise ratio: %.4f" % (
             i, gamma_c[i], gamma_c[i] * 0.9, noise_ratio))
         real_noise_level[i] = noise_ratio
     return (y_train_noisy, gamma_s, real_noise_level)

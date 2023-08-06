@@ -7,6 +7,8 @@ from sklearn.mixture import GaussianMixture
 from .client_selection import ClientSelection
 from .fedcor_util import add_noise, lid_term, get_output
 
+from utils import logger
+
 class FedCor(ClientSelection):
     def __init__(self, args, total, device,
             seed = 13,
@@ -77,10 +79,10 @@ class FedCor(ClientSelection):
         self.train_sizes = train_sizes
 
     def init(self, global_model):
-        print(f">> [{self.stage_name} iter {self.iter_cnt_per_stage}/{self.iter_cnt}] init ... ")
+        logger.info(f">> [{self.stage_name} iter {self.iter_cnt_per_stage}/{self.iter_cnt}] init ... ")
         need_init = True
         if self.stage == 1:
-            print(f"   sub_iter_num = {self.sub_iter_num} ")
+            logger.info(f"   sub_iter_num = {self.sub_iter_num} ")
             if self.sub_iter_num == 0:
                 need_init = True
             else:

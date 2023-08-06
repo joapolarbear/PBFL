@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import TensorDataset
 import json
 
-import utils
+from utils import logger
 
 from .base_dataset import BaseDataset
 
@@ -21,7 +21,7 @@ class FederatedEMNISTDataset_nonIID(BaseDataset):
         self.min_num_samples = 10
 
         self._init_data(data_dir)
-        utils.logger.info(f'#TrainClients {self.train_num_clients} #TestClients {self.test_num_clients}')
+        logger.info(f'#TrainClients {self.train_num_clients} #TestClients {self.test_num_clients}')
         # 3383
 
     def _init_data(self, data_dir):
@@ -69,7 +69,7 @@ def _register_data(_user_data: dict, _data_local_dict: dict, _data_local_num_dic
     _data_local_num_dict[new_idx] = len(data_x)
     
     if not is_train and len(data_x) == 0:
-        utils.logger.info(f"No test data for client {client_idx}")
+        logger.info(f"No test data for client {client_idx}")
     
     return True
 
@@ -81,7 +81,7 @@ def preprocess(data_dir, min_num_samples):
         train_data, train_ids, num_clients_train = _load_data('../dataset/FederatedEMNIST/mytrain.json')
         test_data, test_ids, num_clients_test = _load_data('../dataset/FederatedEMNIST/mytest.json')
 
-        utils.logger.info(f'#TrainClients {num_clients_train} #TestCli`ents {num_clients_test}')
+        logger.info(f'#TrainClients {num_clients_train} #TestCli`ents {num_clients_test}')
 
         idx = 0
         for client_idx, client_name in enumerate(train_ids):
@@ -102,7 +102,7 @@ def preprocess(data_dir, min_num_samples):
         test_ids = list(test_data['examples'].keys())
         num_clients_train = len(train_ids) if num_clients is None else num_clients
         num_clients_test = len(test_ids) if num_clients is None else num_clients
-        utils.logger.info(f'num_clients_train {num_clients_train} num_clients_test {num_clients_test}')
+        logger.info(f'num_clients_train {num_clients_train} num_clients_test {num_clients_test}')
 
         # local dataset
         train_data_local_dict, train_data_local_num_dict = {}, {}

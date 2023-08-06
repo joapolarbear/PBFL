@@ -10,9 +10,9 @@ import random
 from .client import Client
 from .client_selection.config import *
 from .trainer import Trainer
+from utils import logger
 
 from torch.utils.data import TensorDataset
-
 
 class Server(object):
     def __init__(self, data, init_model, args, selection, fed_algo, files):
@@ -95,7 +95,7 @@ class Server(object):
         Y = torch.cat(yss, dim=0)
         perm = torch.randperm(len(Y))
         self.global_test_data = TensorDataset(X[perm], Y[perm])
-        print(f"Global test data size: {len(Y)}")
+        logger.info(f"Global test data size: {len(Y)}")
    
 
     def _init_clients(self, init_model):
@@ -125,7 +125,8 @@ class Server(object):
         """
         ## ITER COMMUNICATION ROUND
         for round_idx in range(self.total_round):
-            print(f'\n> ROUND {round_idx}')
+            print()
+            logger.info(f'ROUND {round_idx}')
 
             ## GET GLOBAL MODEL
             #self.global_model = self.trainer.get_model()
@@ -134,7 +135,7 @@ class Server(object):
             # set clients
             client_indices = [*range(self.total_num_client)]
             if self.num_available is not None:
-                print(f'>> available clients {self.num_available}/{len(client_indices)}')
+                logger.info(f'available clients {self.num_available}/{len(client_indices)}')
                 np.random.seed(self.args.seed + round_idx)
                 client_indices = np.random.choice(client_indices, self.num_available, replace=False)
                 self.save_selected_clients(round_idx, client_indices)
@@ -154,7 +155,7 @@ class Server(object):
             # candidate client selection before local training
             if self.args.method in CANDIDATE_SELECTION_METHOD:
                 # np.random.seed((self.args.seed+1)*10000000 + round_idx)
-                print(f'>> candidate client selection {self.args.num_candidates}/{len(client_indices)}')
+                logger.info(f'Candidate client selection {self.args.num_candidates}/{len(client_indices)}')
                 client_indices = self.selection_method.select_candidates(client_indices, self.args.num_candidates)
 
             ## PRE-CLIENT SELECTION
@@ -169,15 +170,21 @@ class Server(object):
                     num_before = len(client_indices)
                     client_indices = self.selection_method.select(**kwargs, metric=None)
                     # del local_models
-                    print(f'>> Pre-client selection {len(client_indices)}/{num_before}')
+                    logger.info(f'Pre-client selection {len(client_indices)}/{num_before}')
                 elif self.args.method == "FedCor":
                     num_before = len(client_indices)
                     client_indices = self.selection_method.select()
-                    print(f'>> Pre-client selection {len(client_indices)}/{num_before}')
+                    logger.info(f'Pre-client selection {len(client_indices)}/{num_before}')
                 else:
                     client_indices = self.selection_method.select(self.num_clients_per_round, client_indices, None)
-                    print(f'>> Pre-client selection {len(client_indices)}/{len(client_indices)}')
-                print(f'   selected clients: {sorted(client_indices)[:10]} ... ')
+                    logger.info(f'Pre-client selection {len(client_indices)}/{len(client_indices)}')
+                
+                rst = sorted([str(i) for i in client_indices])
+                THRESHOLD = 10
+                if len(rst) <= THRESHOLD:
+                    logger.info(f'Selected clients: [{", ".join(rst)}]')
+                else:
+                    logger.info(f'Selected clients: [{", ".join(rst[:THRESHOLD])} ... ]')
 
             ## CLIENT UPDATE (TRAINING)
             engated_client_indices = deepcopy(client_indices)
@@ -187,7 +194,7 @@ class Server(object):
 
             ## POST-CLIENT SELECTION
             if self.args.method not in PRE_SELECTION_METHOD:
-                print(f'>> post-client selection {self.num_clients_per_round}/{len(client_indices)}')
+                logger.info(f'Post-client selection {self.num_clients_per_round}/{len(client_indices)}')
                 kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
                 kwargs['results'] = self.files['prob'] if self.save_probs else None
                 # select by local models(gradients)
@@ -273,13 +280,12 @@ class Server(object):
             phase='Test'
             self.record[f'{phase}/Loss'] = result["loss"]
             self.record[f'{phase}/Acc'] = result["acc"]
-            status = 'ALL'
 
             if self.args.method == "FedCor":
-                print('>> [{}] {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(
-                    self.selection_method.stage_name, status, phase, result["loss"], result["acc"]))
+                logger.info('[{}] {}ing: Loss {:.6f} Acc {:.4f}'.format(
+                    self.selection_method.stage_name, phase, result["loss"], result["acc"]))
             else:
-                print('>> {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, result["loss"], result["acc"]))
+                logger.info('{}ing: Loss {:.6f} Acc {:.4f}'.format(phase, result["loss"], result["acc"]))
 
             if self.args.wandb:
                 wandb.log(self.record)
@@ -348,8 +354,8 @@ class Server(object):
                 accuracy.extend(result['acc'])
                 local_metrics.extend(result['metric'])
 
-                progressBar(len(local_losses), len(client_indices),
-                            {'loss': sum(result['loss'])/len(result), 'acc': sum(result['acc'])/len(result)})
+                # progressBar(len(local_losses), len(client_indices),
+                #             {'loss': sum(result['loss'])/len(result), 'acc': sum(result['acc'])/len(result)})
 
                 if self.args.method in LOSS_THRESHOLD:
                     if min(result['llow']) < ll: ll = min(result['llow'])
@@ -367,13 +373,12 @@ class Server(object):
                     if result['llow'] < ll: ll = result['llow'].item()
                     lh += result['lhigh']
 
-                progressBar(len(local_losses), len(client_indices), result)
+                # progressBar(len(local_losses), len(client_indices), result)
 
         if self.args.method in LOSS_THRESHOLD:
             lh /= len(client_indices)
             self.ltr = self.selection_method.update(lh, ll, self.ltr)
 
-        print()
         return local_losses, accuracy, local_metrics
 
     def test(self, num_clients_for_test, phase='Test'):
@@ -397,8 +402,8 @@ class Server(object):
                 metrics['loss'].extend(result['loss'])
                 metrics['acc'].extend(result['acc'])
 
-                progressBar(len(metrics['acc']) * iter, num_clients_for_test, phase='Test',
-                            result={'loss': sum(result['loss']) / len(result), 'acc': sum(result['acc']) / len(result)})
+                # progressBar(len(metrics['acc']) * iter, num_clients_for_test, phase='Test',
+                #             result={'loss': sum(result['loss']) / len(result), 'acc': sum(result['acc']) / len(result)})
         else:
             for client_idx in range(num_clients_for_test):
                 result = self.local_testing(client_idx)
@@ -406,9 +411,8 @@ class Server(object):
                 metrics['loss'].append(result['loss'])
                 metrics['acc'].append(result['acc'])
 
-                progressBar(len(metrics['acc']), num_clients_for_test, result, phase='Test')
+                # progressBar(len(metrics['acc']), num_clients_for_test, result, phase='Test')
 
-        print()
         self.save_current_updates(metrics['loss'], metrics['acc'], num_clients_for_test, phase=phase)
 
 
@@ -434,7 +438,7 @@ class Server(object):
         self.record[f'{phase}/Acc'] = acc
         status = num_clients if phase == 'Train' else 'ALL'
 
-        print('   {} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, loss, acc))
+        logger.info('{} Clients {}ing: Loss {:.6f} Acc {:.4f}'.format(status, phase, loss, acc))
 
         if phase == 'Test':
             if self.args.wandb:
@@ -475,7 +479,7 @@ class Server(object):
                 tmp.extend(torch.flatten(local_model_param.cpu().state_dict()[k]).tolist())
             variance += torch.var(torch.tensor(tmp), dim=0)
         variance /= len(local_models)
-        print('variance of model weights {:.8f}'.format(variance))
+        logger.info('variance of model weights {:.8f}'.format(variance))
 
 
 
