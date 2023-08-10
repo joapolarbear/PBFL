@@ -51,9 +51,10 @@ class BaseDataset:
             self._input_shape = x.shape[1:]
         return self._input_shape
     
-    def check_test_dist(self, name, dataset = None):
+    def check_test_dist(self, name, dataset = None, is_train=True):
         _dataset = dataset or self.dataset
-        test_data_local_dict: dict = _dataset["test"]["data"]
+        _key = "train" if is_train else "test"
+        test_data_local_dict: dict = _dataset[_key]["data"]
         labels_list = []
         for client_id, local_data in test_data_local_dict.items():
             x, y = local_data.tensors
@@ -62,14 +63,15 @@ class BaseDataset:
         rst = _label_to_distribution(lables)
         print(f"{name}, len={len(lables)}, Test Dist: {_distribution_str(rst)}")
 
-    def check_test_dist_by_client(self, name, dataset = None):
+    def check_test_dist_by_client(self, name, dataset = None, is_train=True):
         _dataset = dataset or self.dataset
-        test_data_local_dict: dict = _dataset["test"]["data"]
+        _key = "train" if is_train else "test"
+        test_data_local_dict: dict = _dataset[_key]["data"]
         for client_id, local_data in test_data_local_dict.items():
             x, y = local_data.tensors
             lables = [int(e) for e in y]
             rst = _label_to_distribution(lables)
-            print(f"{name}_{client_id:03d}, Test Dist: {_distribution_str(rst)}")
+            print(f"{name}_{client_id:03d}, {'Train' if is_train else 'Test'} Dist: {_distribution_str(rst)}")
 
  
 

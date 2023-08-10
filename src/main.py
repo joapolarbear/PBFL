@@ -100,7 +100,7 @@ if __name__ == '__main__':
             os.environ["CUDA_VISIBLE_DEVICES"]=args.gpu_id
         args.device = torch.device(f"cuda:{args.gpu_id[0]}")
         torch.cuda.set_device(args.device)
-        logger.info('Current cuda device ', torch.cuda.current_device())
+        logger.info(f'Current cuda device {torch.cuda.current_device()}')
 
     # set data
     data = load_data(args)

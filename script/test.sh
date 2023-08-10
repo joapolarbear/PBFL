@@ -8,18 +8,20 @@ MODEL=CNN
 # MODEL=RESNET18
 BATCH_SIZE=10
 TRAIN_ROUND=500
-NUM_CLIENT_PER_ROUND=10
+NUM_CLIENT_PER_ROUND=5
 TOTAL_CLIENT_NUM=200
+
 # DATASET=FederatedEMNIST
-DATASET=PartitionedCIFAR10
+# DATASET=PartitionedCIFAR10
 DATASET=cifar
+
 
 DATADIR=./data
 # METHODS=(Random)
-METHODS=(PBFL)
+# METHODS=(PBFL)
 # METHODS=(FedCor )
 # METHODS=(Pow-d)
-# METHODS=(Random PBFL FedCor Pow-d)
+METHODS=(Random PBFL FedCor Pow-d)
 
 for METHOD in ${METHODS[@]}; do
     python3 src/main.py \
@@ -30,5 +32,7 @@ for METHOD in ${METHODS[@]}; do
         --lr_local 0.01 \
         -B ${BATCH_SIZE} -R ${TRAIN_ROUND} -d 10 \
         --method ${METHOD} \
-        --data_dir ${DATADIR}
+        --data_dir ${DATADIR} \
+        --iid 0 \
+        --shards_per_client 2
 done

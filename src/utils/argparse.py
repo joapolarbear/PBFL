@@ -78,6 +78,8 @@ def get_args():
                         help='Default set to IID. Set to 0 for non-IID.')
     parser.add_argument('--unequal', type=int, default=0,
                         help='whether to use unbalanced data splits for non-i.i.d setting (use 0 for equal splits)')
+    parser.add_argument('--shards_per_client',type = int,default=1,
+                        help='number of shards for each client')
     
     # experiment setting
     parser.add_argument('--fix_seed', action='store_true', default=False, help='fix random seed')

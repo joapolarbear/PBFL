@@ -27,6 +27,7 @@ def load_data(args):
             f"{args.dataset}_N{args.num_users}_"
             f"alpha{'-none' if args.alpha is None else args.alpha}_"
             f"{'iid' if args.iid else 'noniid'}_"
+            f"{args.shards_per_client}shard-per-client_"
             f"{'eq' if not args.unequal else 'uneq'}.pickle")
         if os.path.exists(cache_path):
             with open(cache_path, 'rb') as fp:
