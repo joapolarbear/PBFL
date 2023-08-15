@@ -81,7 +81,7 @@ if __name__ == '__main__':
             project=f'AFL-{args.dataset}-{args.num_clients_per_round}-{args.num_available}-{args.total_num_clients}',
             name=f"{args.method}{args.comment}",
             config=args,
-            dir='.',
+            dir='../',
             save_code=True,
             mode='offline'
         )
