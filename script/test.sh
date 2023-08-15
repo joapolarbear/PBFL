@@ -6,10 +6,12 @@
 # src/main.py --dataset FederatedEMNIST_nonIID --method PBFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 500
 MODEL=CNN
 # MODEL=RESNET18
-BATCH_SIZE=10
+BATCH_SIZE=50
 TRAIN_ROUND=1000
 NUM_CLIENT_PER_ROUND=5
 TOTAL_CLIENT_NUM=100
+LOCAL_EP=5
+
 
 # DATASET=FederatedEMNIST
 # DATASET=PartitionedCIFAR10
@@ -29,11 +31,13 @@ for METHOD in ${METHODS[@]}; do
         --model ${MODEL} \
         -A ${NUM_CLIENT_PER_ROUND} \
         -K ${TOTAL_CLIENT_NUM} \
-        --lr_local 0.01 \
+        --lr_local 0.01 --lr_decay=1.0 -wdecay=3e-4 \
+        -E $LOCAL_EP \
         -B ${BATCH_SIZE} -R ${TRAIN_ROUND} -d 10 \
         --method ${METHOD} \
         --data_dir ${DATADIR} \
-        --iid 0 \
-        --shards_per_client 2 \
+        --iid 0 --unequal=0 \
+        --shards_per_client 1 \
+        --dirichlet_alpha 0.2 \
         $@
 done

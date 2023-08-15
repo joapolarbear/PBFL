@@ -132,6 +132,9 @@ class Server(object):
             #self.global_model = self.trainer.get_model()
             self.global_model = self.global_model.to(self.device)
 
+            if self.args.dataset=='cifar' or round_idx in self.args.schedule:
+                self.args.lr_local *= self.args.lr_decay
+            
             # set clients
             client_indices = [*range(self.total_num_client)]
             if self.num_available is not None:

@@ -56,7 +56,7 @@ def client_selection_method(args):
     elif args.method == 'GradNorm':
         return GradNorm(**kwargs)
     elif args.method == 'PBFL':
-        return Proj_Bandit(args, **kwargs)
+        return Proj_Bandit(**kwargs)
     elif args.method == "FedCorr":
         return FedCorr(args, **kwargs)
     elif args.method == "Single":

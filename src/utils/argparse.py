@@ -28,6 +28,11 @@ def get_args():
     parser.add_argument('--wdecay', type=float, default=0, help='weight decay for optim')
     parser.add_argument('--momentum', type=float, default=0, help='momentum for SGD')
     parser.add_argument('--beta', type=float, default=0)
+    
+    parser.add_argument('--lr_decay',type = float,default=0.1,
+                        help = 'Learning rate decay at specified rounds')
+    parser.add_argument('--schedule', type=int, nargs='*', default=[162, 244],
+                        help='Decrease learning rate at these rounds.')
 
     parser.add_argument('--beta1', type=float, default=0.9, help='beta1 for Adam')
     parser.add_argument('--beta2', type=float, default=0.999, help='beta2 for Adam')

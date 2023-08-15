@@ -9,9 +9,9 @@ from itertools import product
 from utils import logger
 from .fedcor import FedCorr
 
-class Proj_Bandit(FedCorr):
-    def __init__(self, args, total, device):
-        super().__init__(args, total, device)
+class Proj_Bandit(ClientSelection):
+    def __init__(self, total, device):
+        super().__init__(total, device)
 
         self.client2rewards = []
         for _ in range(total):
@@ -24,8 +24,9 @@ class Proj_Bandit(FedCorr):
 
         self.global_accu = 0
         self.global_loss = 1e6
-
-        self.stage_names = ["WARMUP", "NORMAL"]
+        
+        self.warmup_bound = 20
+        self.warmup_frac = 1 / self.warmup_bound
     
     def setup(self, n_samples):
         self.accuracy_per_update = [self.global_accu]
@@ -117,25 +118,20 @@ class Proj_Bandit(FedCorr):
         Args
             metric: local_gradients
         '''
-        # get clients' projected gradients
-        MAX_SELECTED_NUM = math.ceil(self.total * self.warmup_frac)
         
-        if self.stage == 1:
-            selected_client_idxs = np.random.choice(
-                range(self.total), int(self.total*self.warmup_frac), p=self.prob, replace=False)
-            self.sub_iter_num += 1
-        # if self.warmup:
-        #     self.warmup = True
-        #     logger.info(f"> PBFL warmup {self.client_update_cnt}")
-        #     st = self.client_update_cnt * MAX_SELECTED_NUM
-        #     ed = st + MAX_SELECTED_NUM
-        #     if ed >= self.total:
-        #         self.warmup = False
-        #     ed = min(ed, self.total)
-        #     selected_client_index = np.arange(st, ed)
-        #     # selected_client_index = np.arange(self.total)
-        #     # selected_client_index = np.random.choice(self.total, n, replace=False)
-        elif self.stage == 2:
+        
+        if self.client_update_cnt < self.warmup_bound:
+            MAX_SELECTED_NUM = math.ceil(self.total * self.warmup_frac)
+            logger.info(f"> PBFL warmup {self.client_update_cnt}")
+            selected_client_index = np.random.choice(
+                self.total, MAX_SELECTED_NUM, replace=False)
+            # st = self.client_update_cnt * MAX_SELECTED_NUM
+            # ed = st + MAX_SELECTED_NUM
+            # ed = min(ed, self.total)
+            # selected_client_index = np.arange(st, ed)
+            # selected_client_index = np.arange(self.total)
+            # selected_client_index = np.random.choice(self.total, n, replace=False)
+        else:
             ucb = self.get_ucb(a=self.client_update_cnt)
             sorted_client_idxs = ucb.argsort()[::-1]
             ### Select clients
@@ -145,33 +141,7 @@ class Proj_Bandit(FedCorr):
                 
             self.iter_cnt += 1
             self.iter_cnt_per_stage += 1
-        else:
-            raise
 
         self.client_update_cnt += 1
 
         return selected_client_index.astype(int)
-    
-    def warmup_sub_iter_hook(self, engated_client_indices):
-        for client_id in engated_client_indices:
-            self.prob[client_id] = 0
-        if sum(self.prob) > 0:
-            self.fix_prob()
-            
-        if self.warmup_iter_end:
-            self.warmup_iter_summary()
-    
-    def warmup_iter_summary(self):
-        self.sub_iter_num = 0
-        self.iter_cnt += 1
-        self.iter_cnt_per_stage += 1
-
-        if self.warmup_end:
-            self.end_warmup()
-    
-    def end_warmup(self):
-        self.iter_cnt_per_stage = 0
-
-        self.stage = 2
-        self.m = None
-        self.prob = None

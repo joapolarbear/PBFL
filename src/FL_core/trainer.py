@@ -22,7 +22,6 @@ class Trainer:
         self.num_classes = args.num_classes
 
         # hyperparameter
-        self.lr = args.lr_local
         self.wdecay = args.wdecay
         self.momentum = args.momentum
         self.num_epoch = args.num_epoch    # num of local epoch E
@@ -73,9 +72,9 @@ class Trainer:
 
         # optimizer
         if self.client_optimizer == 'sgd':
-            optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.wdecay)
+            optimizer = optim.SGD(self.model.parameters(), lr=self.lr_local, momentum=self.momentum, weight_decay=self.wdecay)
         else:
-            optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.wdecay)
+            optimizer = optim.Adam(self.model.parameters(), lr=self.lr_local, weight_decay=self.wdecay)
 
         criterion = nn.CrossEntropyLoss()
         
@@ -145,10 +144,10 @@ class Trainer:
 
         # optimizer
         if self.client_optimizer == 'sgd':
-            optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=self.momentum,
+            optimizer = optim.SGD(self.model.parameters(), lr=self.lr_local, momentum=self.momentum,
                                        weight_decay=self.wdecay)
         else:
-            optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.wdecay)
+            optimizer = optim.Adam(self.model.parameters(), lr=self.lr_local, weight_decay=self.wdecay)
 
         criterion = nn.CrossEntropyLoss()
 
