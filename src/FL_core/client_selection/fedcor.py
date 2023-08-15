@@ -14,12 +14,9 @@ class FedCor(ClientSelection):
             seed = 13,
             correction = False,
             finetuning = False,
-            iteration1 = 5,
-            frac1 = 0.02,
-            # frac1 = 0.05,
-            frac2 = 0.05,
-            rounds1 = 200,
-            rounds2 = 200,
+            finetune_frac = 0.05,
+            finetune_iter_num = 200,
+            # rounds2 = 200,
             relabel_ratio = 0.5,
             confidence_thres = 0.5,
             clean_set_thres = 0.1):
@@ -32,11 +29,11 @@ class FedCor(ClientSelection):
         self.correction = correction
         self.finetuning = finetuning
         
-        self.iteration1 = iteration1
-        self.frac1 = frac1
-        self.frac2 = frac2
-        self.rounds1 = rounds1
-        self.rounds2 = rounds2
+        self.warmup_iter_num = args.warmup_iter_num
+        self.warmup_frac = args.warmup_frac
+        self.finetune_frac = finetune_frac
+        self.finetune_iter_num = finetune_iter_num
+        # self.rounds2 = rounds2
         self.relabel_ratio = relabel_ratio
         self.confidence_thres = confidence_thres
         self.clean_set_thres = clean_set_thres
@@ -53,23 +50,23 @@ class FedCor(ClientSelection):
     
     @property
     def warmup_iter_end(self):
-        return self.stage == 1 and self.sub_iter_num == int(1/self.frac1)
+        return self.stage == 1 and self.sub_iter_num == int(1/self.warmup_frac)
 
     @property
     def warmup_end(self):
-        return self.stage == 1 and self.iter_cnt >= self.iteration1
+        return self.stage == 1 and self.iter_cnt >= self.warmup_iter_num
 
     @property
     def finetune_end(self):
         assert self.finetuning
-        return self.stage == 2 and self.iter_cnt >= (self.iteration1 + self.rounds1)
+        return self.stage == 2 and self.iter_cnt >= (self.warmup_iter_num + self.finetune_iter_num)
     
-    @property
-    def total_round_num(self):
-        _total = self.iteration1 * int(1/self.frac1) + self.rounds2
-        if self.finetuning:
-            _total += self.rounds1
-        return _total
+    # @property
+    # def total_round_num(self):
+    #     _total = self.warmup_iter_num * int(1/self.warmup_frac) + self.rounds2
+    #     if self.finetuning:
+    #         _total += self.finetune_iter_num
+    #     return _total
 
     @property
     def stage_name(self):
@@ -115,7 +112,7 @@ class FedCor(ClientSelection):
     def select(self):
         if self.stage == 1:
             selected_client_idxs = np.random.choice(
-                range(self.total), int(self.total*self.frac1), p=self.prob, replace=False)
+                range(self.total), int(self.total*self.warmup_frac), p=self.prob, replace=False)
             self.sub_iter_num += 1
         elif self.stage == 2 or self.stage == 3:
             selected_client_idxs = np.random.choice(
@@ -181,11 +178,11 @@ class FedCor(ClientSelection):
             self.prob = np.zeros(self.total) # np.zeros(100)
             self.prob[selected_clean_idx] = 1 / len(selected_clean_idx)
             self.fix_prob()
-            self.m = max(int(self.frac2 * self.total), 1)  # num_select_clients
+            self.m = max(int(self.finetune_frac * self.total), 1)  # num_select_clients
             self.m = min(self.m, len(selected_clean_idx))
         else:
             self.stage = 3
-            self.m = max(int(self.frac2 * self.total), 1)  # num_select_clients
+            self.m = max(int(self.finetune_frac * self.total), 1)  # num_select_clients
             self.prob = [1/self.total for i in range(self.total)]
 
     def correct_dataset(self, idx, client_output_array, client_loss_array):
@@ -201,6 +198,6 @@ class FedCor(ClientSelection):
     def end_finetune(self):
         self.iter_cnt_per_stage = 0
         self.stage = 3
-        self.m = max(int(self.frac2 * self.total), 1)  # num_select_clients
+        self.m = max(int(self.finetune_frac * self.total), 1)  # num_select_clients
         self.prob = [1/self.total for i in range(self.total)]
         

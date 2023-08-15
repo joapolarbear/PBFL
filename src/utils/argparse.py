@@ -1,7 +1,8 @@
 import argparse
 
 ALL_METHODS = [
-    'Random', 'Cluster1', 'Cluster2', 'Pow-d', 'AFL', 'DivFL', 'GradNorm','PBFL', "FedCor"
+    'Random', 'Cluster1', 'Cluster2', 'Pow-d', 'AFL', 'DivFL', 'GradNorm',
+    'PBFL', "FedCor", "Single"
 ]
 
 
@@ -42,6 +43,10 @@ def get_args():
     parser.add_argument('-R', '--num_round', type=int, default=2000, help='total number of rounds')
     parser.add_argument('-A', '--num_clients_per_round', type=int, default=10, help='number of participated clients')
     parser.add_argument('-K', '--total_num_clients', type=int, default=None, help='total number of clients')
+    
+    # Used for warmup
+    parser.add_argument('--warmup_frac', type=float, default=0.05, help='fractions of clients for each warmup step')
+    parser.add_argument('--warmup_iter_num', type=float, default=5, help='warmup iter num')
 
     parser.add_argument('-u', '--num_updates', type=int, default=None, help='number of updates')
     parser.add_argument('-n', '--num_available', type=int, default=None, help='number of available clients at each round')

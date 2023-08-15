@@ -7,10 +7,11 @@ from tqdm import tqdm
 from itertools import product
 
 from utils import logger
+from .fedcor import FedCor
 
-class Proj_Bandit(ClientSelection):
-    def __init__(self, total, device):
-        super().__init__(total, device)
+class Proj_Bandit(FedCor):
+    def __init__(self, args, total, device):
+        super().__init__(args, total, device)
 
         self.client2rewards = []
         for _ in range(total):
@@ -24,7 +25,7 @@ class Proj_Bandit(ClientSelection):
         self.global_accu = 0
         self.global_loss = 1e6
 
-        self.warmup = True
+        self.stage_names = ["WARMUP", "NORMAL"]
     
     def setup(self, n_samples):
         self.accuracy_per_update = [self.global_accu]
@@ -32,6 +33,8 @@ class Proj_Bandit(ClientSelection):
 
     def init(self, global_m, l=None):
         self.prev_global_params = deepcopy([tens.detach().to(self.device) for tens in list(global_m.parameters())])
+        
+        self.prob = [1 / self.total] * self.total
 
     def update_proj_list(self, selected_client_idxs, global_m, local_models, improved):
         """
@@ -114,25 +117,35 @@ class Proj_Bandit(ClientSelection):
             metric: local_gradients
         '''
         # get clients' projected gradients
-        MAX_SELECTED_NUM = 100
-        if self.warmup:
-            self.warmup = True
-            logger.info(f"> PBFL warmup {self.client_update_cnt}")
-            st = self.client_update_cnt * MAX_SELECTED_NUM
-            ed = st + MAX_SELECTED_NUM
-            if ed >= self.total:
-                self.warmup = False
-            ed = min(ed, self.total)
-            selected_client_index = np.arange(st, ed)
-            # selected_client_index = np.arange(self.total)
-            # selected_client_index = np.random.choice(self.total, n, replace=False)
-        else:
+        MAX_SELECTED_NUM = math.ceil(self.total * self.warmup_frac)
+        
+        if self.stage == 1:
+            selected_client_idxs = np.random.choice(
+                range(self.total), int(self.total*self.warmup_frac), p=self.prob, replace=False)
+            self.sub_iter_num += 1
+        # if self.warmup:
+        #     self.warmup = True
+        #     logger.info(f"> PBFL warmup {self.client_update_cnt}")
+        #     st = self.client_update_cnt * MAX_SELECTED_NUM
+        #     ed = st + MAX_SELECTED_NUM
+        #     if ed >= self.total:
+        #         self.warmup = False
+        #     ed = min(ed, self.total)
+        #     selected_client_index = np.arange(st, ed)
+        #     # selected_client_index = np.arange(self.total)
+        #     # selected_client_index = np.random.choice(self.total, n, replace=False)
+        elif self.stage == 2:
             ucb = self.get_ucb(a=self.client_update_cnt)
             sorted_client_idxs = ucb.argsort()[::-1]
             ### Select clients
             selected_client_index = sorted_client_idxs[:n]
             for client_idx in selected_client_index:
                 self.client2selected_cnt[client_idx] += 1
+                
+            self.iter_cnt += 1
+            self.iter_cnt_per_stage += 1
+        else:
+            raise
 
         self.client_update_cnt += 1
 

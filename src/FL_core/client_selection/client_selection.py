@@ -30,3 +30,12 @@ class RandomSelection(ClientSelection):
     def select(self, n, client_idxs, metric=None):
         selected_client_idxs = np.random.choice(client_idxs, size=n, replace=False)
         return selected_client_idxs
+    
+class SingleSelection(ClientSelection):
+    def __init__(self, total, device):
+        super().__init__(total, device)
+    
+    def select(self, n, client_idxs, metric=None):
+        assert n == 1, n
+        assert len(client_idxs) == 1
+        return np.array([0])

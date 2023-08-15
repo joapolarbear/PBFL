@@ -1,7 +1,7 @@
 # config for client selection
 
 PRE_SELECTION_METHOD = ['Random', 'Cluster1', 'Cluster2', 'NumDataSampling', 'NumDataSampling_rep',
-                        'Random_d', 'Random_d_smp', 'PBFL', 'FedCor']
+                        'Random_d', 'Random_d_smp', 'PBFL', 'FedCor', 'Single']
 
 # POST_SELECTION: 'Pow-d','AFL','MaxEntropy','MaxEntropySampling','MaxEntropySampling_1_p','MinEntropy',
 #                 'GradNorm','GradSim','GradCosSim','OCS','DivFL','LossCurr','MisClfCurr'
