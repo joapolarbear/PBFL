@@ -1,6 +1,8 @@
 #!/bin/bash
 
-export WANDB_LOG_PATH=$(realpath $0/../../../)/wandb
+CURDIRNAME=$(dirname $0)
+export WANDB_LOG_PATH=$(realpath $CURDIRNAME/../../../)
+echo WANDB log path $WANDB_LOG_PATH/wandb
 
 python3 3rdparty/FedCor/main.py \
     --gpu=0 --gpr_gpu=0 \
