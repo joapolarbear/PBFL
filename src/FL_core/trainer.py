@@ -95,7 +95,7 @@ class Trainer:
 
                 if self.args.beta > 0 and mu > 0:
                     if num_update > 0:
-                        print(f"FedCor trainer: mu={mu}, beta={self.args.beta}")
+                        print(f"FedCorr trainer: mu={mu}, beta={self.args.beta}")
                         w_diff = torch.tensor(0.).to(self.device)
                         for w, w_t in zip(global_model.parameters(), self.model.parameters()):
                             w_diff += torch.pow(torch.norm(w - w_t), 2)

@@ -19,9 +19,9 @@ DATASET=cifar
 DATADIR=./data
 # METHODS=(Random)
 METHODS=(PBFL)
-# METHODS=(FedCor)
+# METHODS=(FedCorr)
 # METHODS=(Pow-d)
-# METHODS=(Random PBFL FedCor Pow-d)
+# METHODS=(Random PBFL FedCorr Pow-d)
 
 for METHOD in ${METHODS[@]}; do
     python3 src/main.py \

@@ -2,7 +2,7 @@ import argparse
 
 ALL_METHODS = [
     'Random', 'Cluster1', 'Cluster2', 'Pow-d', 'AFL', 'DivFL', 'GradNorm',
-    'PBFL', "FedCor", "Single"
+    'PBFL', "FedCorr", "Single"
 ]
 
 
@@ -66,7 +66,7 @@ def get_args():
                         help='splitting points (epoch number) for multiple episodes of training')
     parser.add_argument('--maxlen', type=int, default=400, help='maxlen for NLP dataset')
 
-    # Additional model arguments for models in FedCor
+    # Additional model arguments for models in FedCorr
     parser.add_argument('--kernel_sizes', type=int, default=[3, 3, 3],nargs="*",
                         help='kernel size in each convolutional layer')
     parser.add_argument('--num_filters', type=int, default=[32, 64, 64],nargs = "*",

@@ -7,9 +7,9 @@ from tqdm import tqdm
 from itertools import product
 
 from utils import logger
-from .fedcor import FedCor
+from .fedcor import FedCorr
 
-class Proj_Bandit(FedCor):
+class Proj_Bandit(FedCorr):
     def __init__(self, args, total, device):
         super().__init__(args, total, device)
 
@@ -32,9 +32,10 @@ class Proj_Bandit(FedCor):
         self.loss_per_update = [self.global_loss]
 
     def init(self, global_m, l=None):
+        logger.info(f">> [{self.stage_name} iter {self.iter_cnt_per_stage}/{self.iter_cnt}] init ... ")
         self.prev_global_params = deepcopy([tens.detach().to(self.device) for tens in list(global_m.parameters())])
-        
-        self.prob = [1 / self.total] * self.total
+        if self.stage == 1:
+            self.prob = [1 / self.total] * self.total
 
     def update_proj_list(self, selected_client_idxs, global_m, local_models, improved):
         """
@@ -150,3 +151,27 @@ class Proj_Bandit(FedCor):
         self.client_update_cnt += 1
 
         return selected_client_index.astype(int)
+    
+    def warmup_sub_iter_hook(self, engated_client_indices):
+        for client_id in engated_client_indices:
+            self.prob[client_id] = 0
+        if sum(self.prob) > 0:
+            self.fix_prob()
+            
+        if self.warmup_iter_end:
+            self.warmup_iter_summary()
+    
+    def warmup_iter_summary(self):
+        self.sub_iter_num = 0
+        self.iter_cnt += 1
+        self.iter_cnt_per_stage += 1
+
+        if self.warmup_end:
+            self.end_warmup()
+    
+    def end_warmup(self):
+        self.iter_cnt_per_stage = 0
+
+        self.stage = 2
+        self.m = None
+        self.prob = None

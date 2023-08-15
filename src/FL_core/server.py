@@ -143,7 +143,7 @@ class Server(object):
             # set client selection methods
             # initialize selection methods by setting given global model
             if self.args.method in NEED_INIT_METHOD:
-                if self.args.method in ["PBFL", "DivFL", "FedCor"]:
+                if self.args.method in ["PBFL", "DivFL", "FedCorr"]:
                     self.selection_method.init(self.global_model)
                 else:
                     raise NotImplementedError("We do not maintain a cost model for each client, "
@@ -171,7 +171,7 @@ class Server(object):
                     client_indices = self.selection_method.select(**kwargs, metric=None)
                     # del local_models
                     logger.info(f'Pre-client selection {len(client_indices)}/{num_before}')
-                elif self.args.method == "FedCor":
+                elif self.args.method == "FedCorr":
                     num_before = len(client_indices)
                     client_indices = self.selection_method.select()
                     logger.info(f'Pre-client selection {len(client_indices)}/{num_before}')
@@ -220,7 +220,7 @@ class Server(object):
 
             ## SERVER AGGREGATION
             # DEBUGGING
-            if self.args.method not in ["PBFL", "FedCor"]:
+            if self.args.method not in ["PBFL", "FedCorr"]:
                 assert len(client_indices) == self.num_clients_per_round, \
                     (len(client_indices), self.num_clients_per_round)
                         
@@ -234,7 +234,7 @@ class Server(object):
             # update aggregated model to global model
             self.global_model.load_state_dict(global_model_params)
             
-            if self.args.method == "FedCor":
+            if self.args.method == "FedCorr":
                 if self.selection_method.stage == 1:
                     ### warmup phase
                     for client_id in engated_client_indices:
@@ -261,6 +261,14 @@ class Server(object):
                     pass
                 else:
                     raise
+            elif self.args.method == "PBFL":
+                if self.selection_method.stage == 1:
+                    ### warmup phase
+                    self.selection_method.warmup_sub_iter_hook(engated_client_indices)
+                elif self.selection_method.stage == 2:
+                    pass
+                else:
+                    raise
                     
             ## TEST
             # if round_idx % self.args.test_freq == 0:
@@ -281,7 +289,7 @@ class Server(object):
             self.record[f'{phase}/Loss'] = result["loss"]
             self.record[f'{phase}/Acc'] = result["acc"]
 
-            if self.args.method == "FedCor":
+            if self.args.method == "FedCorr":
                 logger.info('[{}] {}ing: Loss {:.6f} Acc {:.4f}'.format(
                     self.selection_method.stage_name, phase, result["loss"], result["acc"]))
             else:
@@ -312,7 +320,7 @@ class Server(object):
         if self.args.method in LOSS_THRESHOLD:
             client.trainer.update_ltr(self.ltr)
         
-        if self.args.method == "FedCor":
+        if self.args.method == "FedCorr":
             mu = self.selection_method.get_mu(client_idx)
             result = client.train(self.global_model, mu=mu)
         else:
