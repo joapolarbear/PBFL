@@ -85,7 +85,7 @@ if __name__ == '__main__':
             save_code=True,
             mode='offline'
         )
-        wandb.run.log_code(".", include_fn=lambda x: 'src/' in x or 'main.py' in x)
+        # wandb.run.log_code(".", include_fn=lambda x: 'src/' in x or 'main.py' in x)
 
     # fix seed
     if True or args.fix_seed:

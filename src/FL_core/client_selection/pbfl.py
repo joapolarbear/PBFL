@@ -5,6 +5,9 @@ import torch
 from copy import deepcopy
 from tqdm import tqdm
 from itertools import product
+import sys
+import signal
+import atexit
 
 from utils import logger
 
@@ -26,6 +29,15 @@ class Proj_Bandit(ClientSelection):
         
         self.warmup_bound = 20
         self.warmup_frac = 1 / self.warmup_bound
+        
+        # signal.signal(signal.SIGINT, self.signal_handler)
+        # signal.signal(signal.SIGTERM, self.signal_handler)
+        atexit.register(self.signal_handler)
+    
+    def signal_handler(self, *args):
+        print()
+        print(self.client2selected_cnt)
+        sys.exit(0)
     
     def setup(self, n_samples):
         self.accuracy_per_update = [self.global_accu]
@@ -132,9 +144,9 @@ class Proj_Bandit(ClientSelection):
             sorted_client_idxs = ucb.argsort()[::-1]
             ### Select clients
             selected_client_index = sorted_client_idxs[:n]
-            for client_idx in selected_client_index:
-                self.client2selected_cnt[client_idx] += 1
-
+            
+        for client_idx in selected_client_index:
+            self.client2selected_cnt[client_idx] += 1
         self.client_update_cnt += 1
 
         return selected_client_index.astype(int)

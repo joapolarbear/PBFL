@@ -15,7 +15,7 @@ python3 3rdparty/FedCor/main.py \
     --lr=0.01 --lr_decay=1.0 --optimizer=sgd --reg=3e-4 \
     --iid=0 --unequal=0 \
     --alpha=0.2 \
-    --verbose=1 \
+    --verbose=0 \
     --seed 1 2 3 4 5 \
     --gpr --discount=0.9 --GPR_interval=50 \
     --group_size=500 --GPR_gamma=0.99 \
