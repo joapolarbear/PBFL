@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CURDIRNAME=$(dirname $0)
-export WANDB_LOG_PATH=$(realpath $CURDIRNAME/../../../)
+export WANDB_LOG_PATH=$(realpath $CURDIRNAME/../../)
 echo WANDB log path $WANDB_LOG_PATH/wandb
 
 python3 3rdparty/FedCor/main.py \

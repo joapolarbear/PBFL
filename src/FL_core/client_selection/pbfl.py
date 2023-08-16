@@ -7,7 +7,6 @@ from tqdm import tqdm
 from itertools import product
 
 from utils import logger
-from .fedcor import FedCorr
 
 class Proj_Bandit(ClientSelection):
     def __init__(self, total, device):
@@ -33,10 +32,7 @@ class Proj_Bandit(ClientSelection):
         self.loss_per_update = [self.global_loss]
 
     def init(self, global_m, l=None):
-        logger.info(f">> [{self.stage_name} iter {self.iter_cnt_per_stage}/{self.iter_cnt}] init ... ")
         self.prev_global_params = deepcopy([tens.detach().to(self.device) for tens in list(global_m.parameters())])
-        if self.stage == 1:
-            self.prob = [1 / self.total] * self.total
 
     def update_proj_list(self, selected_client_idxs, global_m, local_models, improved):
         """
@@ -138,9 +134,6 @@ class Proj_Bandit(ClientSelection):
             selected_client_index = sorted_client_idxs[:n]
             for client_idx in selected_client_index:
                 self.client2selected_cnt[client_idx] += 1
-                
-            self.iter_cnt += 1
-            self.iter_cnt_per_stage += 1
 
         self.client_update_cnt += 1
 

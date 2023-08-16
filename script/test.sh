@@ -31,7 +31,7 @@ for METHOD in ${METHODS[@]}; do
         --model ${MODEL} \
         -A ${NUM_CLIENT_PER_ROUND} \
         -K ${TOTAL_CLIENT_NUM} \
-        --lr_local 0.01 --lr_decay=1.0 -wdecay=3e-4 \
+        --lr_local 0.01 --lr_decay=1.0 --wdecay=3e-4 \
         -E $LOCAL_EP \
         -B ${BATCH_SIZE} -R ${TRAIN_ROUND} -d 10 \
         --method ${METHOD} \

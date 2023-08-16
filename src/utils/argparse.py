@@ -67,8 +67,8 @@ def get_args():
     parser.add_argument('--dirichlet_alpha', type=float, default=None, help='ratio of data partition from dirichlet distribution')
     
     parser.add_argument('--min_num_samples', type=int, default=None, help='mininum number of samples')
-    parser.add_argument('--schedule', type=int, nargs='+', default=[0, 5, 10, 15, 20, 30, 40, 60, 90, 140, 210, 300],
-                        help='splitting points (epoch number) for multiple episodes of training')
+    # parser.add_argument('--schedule', type=int, nargs='+', default=[0, 5, 10, 15, 20, 30, 40, 60, 90, 140, 210, 300],
+    #                     help='splitting points (epoch number) for multiple episodes of training')
     parser.add_argument('--maxlen', type=int, default=400, help='maxlen for NLP dataset')
 
     # Additional model arguments for models in FedCorr

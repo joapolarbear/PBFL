@@ -72,9 +72,9 @@ class Trainer:
 
         # optimizer
         if self.client_optimizer == 'sgd':
-            optimizer = optim.SGD(self.model.parameters(), lr=self.lr_local, momentum=self.momentum, weight_decay=self.wdecay)
+            optimizer = optim.SGD(self.model.parameters(), lr=self.args.lr_local, momentum=self.momentum, weight_decay=self.wdecay)
         else:
-            optimizer = optim.Adam(self.model.parameters(), lr=self.lr_local, weight_decay=self.wdecay)
+            optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr_local, weight_decay=self.wdecay)
 
         criterion = nn.CrossEntropyLoss()
         
@@ -144,10 +144,10 @@ class Trainer:
 
         # optimizer
         if self.client_optimizer == 'sgd':
-            optimizer = optim.SGD(self.model.parameters(), lr=self.lr_local, momentum=self.momentum,
+            optimizer = optim.SGD(self.model.parameters(), lr=self.args.lr_local, momentum=self.momentum,
                                        weight_decay=self.wdecay)
         else:
-            optimizer = optim.Adam(self.model.parameters(), lr=self.lr_local, weight_decay=self.wdecay)
+            optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr_local, weight_decay=self.wdecay)
 
         criterion = nn.CrossEntropyLoss()
 

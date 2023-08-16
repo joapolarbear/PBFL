@@ -264,14 +264,6 @@ class Server(object):
                     pass
                 else:
                     raise
-            elif self.args.method == "PBFL":
-                if self.selection_method.stage == 1:
-                    ### warmup phase
-                    self.selection_method.warmup_sub_iter_hook(engated_client_indices)
-                elif self.selection_method.stage == 2:
-                    pass
-                else:
-                    raise
                     
             ## TEST
             # if round_idx % self.args.test_freq == 0:
