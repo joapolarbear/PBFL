@@ -66,7 +66,6 @@ class Trainer:
         dataloader = DataLoader(data, **self.loader_kwargs)
 
         self.model.to(self.device)
-
         
         self.model.train()
 
@@ -93,6 +92,7 @@ class Trainer:
                 loss = criterion(output, labels.long())
 
                 if self.args.beta > 0 and mu > 0:
+                    raise NotImplementedError("Deprecated")
                     if num_update > 0:
                         print(f"FedCorr trainer: mu={mu}, beta={self.args.beta}")
                         w_diff = torch.tensor(0.).to(self.device)
@@ -177,9 +177,8 @@ class Trainer:
 
         return result
 
-
     #@torch.no_grad()
-    def test(self, model, data, ema=False):
+    def test(self, _model, data, ema=False, use_local_model=False):
         """
         test
         ---
@@ -190,8 +189,13 @@ class Trainer:
             accuracy, loss, AUC (optional)
         """
         dataloader = DataLoader(data, **self.loader_kwargs)
-
-        model = model.to(self.device)
+        
+        if use_local_model:
+            print("You are now using local model for testing")
+            raise ValueError("`use_local_model` will be deprecated")
+            model = self.model.to(self.device)
+        else:
+            model = _model.to(self.device)
         model.eval()
 
         criterion = nn.CrossEntropyLoss()

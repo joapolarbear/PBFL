@@ -4,5 +4,5 @@ from .loss_based import *
 from .client_selection import *
 from .grad import *
 from .divfl import *
-from .fedcorr import *
+from .fedcor import *
 from .pbfl import *

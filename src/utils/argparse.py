@@ -2,7 +2,7 @@ import argparse
 
 ALL_METHODS = [
     'Random', 'Cluster1', 'Cluster2', 'Pow-d', 'AFL', 'DivFL', 'GradNorm',
-    'PBFL', "FedCorr", "Single"
+    'PBFL', "FedCorr", "Single", "FedCor"
 ]
 
 
@@ -48,10 +48,6 @@ def get_args():
     parser.add_argument('-R', '--num_round', type=int, default=2000, help='total number of rounds')
     parser.add_argument('-A', '--num_clients_per_round', type=int, default=10, help='number of participated clients')
     parser.add_argument('-K', '--total_num_clients', type=int, default=None, help='total number of clients')
-    
-    # Used for warmup
-    parser.add_argument('--warmup_frac', type=float, default=0.05, help='fractions of clients for each warmup step')
-    parser.add_argument('--warmup_iter_num', type=float, default=5, help='warmup iter num')
 
     parser.add_argument('-u', '--num_updates', type=int, default=None, help='number of updates')
     parser.add_argument('-n', '--num_available', type=int, default=None, help='number of available clients at each round')
@@ -71,7 +67,7 @@ def get_args():
     #                     help='splitting points (epoch number) for multiple episodes of training')
     parser.add_argument('--maxlen', type=int, default=400, help='maxlen for NLP dataset')
 
-    # Additional model arguments for models in FedCorr
+    # Additional model arguments for models in FedCor
     parser.add_argument('--kernel_sizes', type=int, default=[3, 3, 3],nargs="*",
                         help='kernel size in each convolutional layer')
     parser.add_argument('--num_filters', type=int, default=[32, 64, 64],nargs = "*",
@@ -83,6 +79,34 @@ def get_args():
     parser.add_argument('--depth',type = int,default = 20, 
                         help = "The depth of ResNet. Only valid when model is resnet")
 
+    # Additional model arguments for FedCor
+    parser.add_argument('--discount',type = float, default=0.9, 
+                        help = 'annealing coefficient, i.e., beta in paper')
+    parser.add_argument('--GPR_interval',type = int, default= 5, 
+                        help = 'interval of sampling and training of GP, namely, Delta t')
+    parser.add_argument('--GPR_gamma',type = float,default = 0.8,
+                        help = 'gamma for training GP')
+    parser.add_argument('--GPR_Epoch',type=int,default=100,
+                        help = 'number of optimization iterations of GP')
+    parser.add_argument('--verbose', type=int, default=0, 
+                        help='verbose')
+    parser.add_argument('--update_mean', action='store_true', 
+                        help="Whether to update the mean of the GPR")
+    parser.add_argument('--warmup',type = int, default=25,
+                        help='length of warm up phase for GP')
+    parser.add_argument('--poly_norm',type=int,default=0,
+                        help='whether to normalize the poly kernel, set 1 to normalize')
+    parser.add_argument('--group_size',type = int, default=10, 
+                        help='length of history round to sample for GP, equal to M in paper')
+    parser.add_argument('--kernel',type = str,default = 'Poly',
+                        help = 'kind of kernel used in GP (Poly,SE)')
+    parser.add_argument('--train_method',type = str,default='MML',
+                        help = 'method of training GP (MML,LOO)')
+    parser.add_argument('--dimension',type = int,default=15,
+                        help = 'dimension of embedding in GP')
+    parser.add_argument('--mu',type = float, default=0.0,
+                        help = 'mu in FedProx')
+    
     # Additional arguments for data distribution
     parser.add_argument('--iid', type=int, default=1,
                         help='Default set to IID. Set to 0 for non-IID.')

@@ -6,6 +6,7 @@ import numpy as np
 import sys
 import multiprocessing as mp
 import random
+import copy
 
 from .client import Client
 from .client_selection.config import *
@@ -37,6 +38,7 @@ class Server(object):
         self.args = args
         self.global_model = init_model
         self.selection_method = selection
+        self.selection_method.server = self
         self.federated_method = fed_algo
         self.files = files
 
@@ -97,7 +99,6 @@ class Server(object):
         self.global_test_data = TensorDataset(X[perm], Y[perm])
         logger.info(f"Global test data size: {len(Y)}")
    
-
     def _init_clients(self, init_model):
         """
         initialize clients' model
@@ -135,7 +136,9 @@ class Server(object):
             if self.args.dataset=='cifar' or round_idx in self.args.schedule:
                 self.args.lr_local *= self.args.lr_decay
             
-            # set clients
+            ##################################################################
+            #                        Set clients
+            ##################################################################
             client_indices = [*range(self.total_num_client)]
             if self.num_available is not None:
                 logger.info(f'available clients {self.num_available}/{len(client_indices)}')
@@ -143,7 +146,9 @@ class Server(object):
                 client_indices = np.random.choice(client_indices, self.num_available, replace=False)
                 self.save_selected_clients(round_idx, client_indices)
 
-            # set client selection methods
+            ##################################################################
+            #                        Set client selection methods
+            ##################################################################
             # initialize selection methods by setting given global model
             if self.args.method in NEED_INIT_METHOD:
                 if self.args.method in ["PBFL", "DivFL", "FedCorr"]:
@@ -161,26 +166,26 @@ class Server(object):
                 logger.info(f'Candidate client selection {self.args.num_candidates}/{len(client_indices)}')
                 client_indices = self.selection_method.select_candidates(client_indices, self.args.num_candidates)
 
-            ## PRE-CLIENT SELECTION
+            ##################################################################
+            #                        PRE-CLIENT SELECTION
+            ##################################################################
             # client selection before local training (for efficiency)
             if self.args.method in PRE_SELECTION_METHOD:
                 # np.random.seed((self.args.seed+1)*10000 + round_idx)
                 
                 if self.args.method == "PBFL":
                     kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
-                    # self.global_model.eval()
-                    # local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
                     num_before = len(client_indices)
                     client_indices = self.selection_method.select(**kwargs, metric=None)
-                    # del local_models
-                    logger.info(f'Pre-client selection {len(client_indices)}/{num_before}')
+                    logger.info(f'Pre-client selection {num_before} -> {len(client_indices)}')
                 elif self.args.method == "FedCorr":
                     num_before = len(client_indices)
                     client_indices = self.selection_method.select()
-                    logger.info(f'Pre-client selection {len(client_indices)}/{num_before}')
+                    logger.info(f'Pre-client selection {num_before} -> {len(client_indices)}')
                 else:
+                    num_before = len(client_indices)
                     client_indices = self.selection_method.select(self.num_clients_per_round, client_indices, None)
-                    logger.info(f'Pre-client selection {len(client_indices)}/{len(client_indices)}')
+                    logger.info(f'Pre-client selection {num_before} -> {len(client_indices)}')
                 
                 rst = sorted([str(i) for i in client_indices])
                 THRESHOLD = 10
@@ -189,13 +194,16 @@ class Server(object):
                 else:
                     logger.info(f'Selected clients: [{", ".join(rst[:THRESHOLD])} ... ]')
 
-            ## CLIENT UPDATE (TRAINING)
-            engated_client_indices = deepcopy(client_indices)
-            
+            ##################################################################
+            #                        CLIENT UPDATE (TRAINING)
+            ##################################################################
+            engaged_client_indices = deepcopy(client_indices)
             ### TODO huhanpeng: add a L2(M_local-M_global) to the loss function
             local_losses, accuracy, local_metrics = self.train_clients(client_indices)
 
-            ## POST-CLIENT SELECTION
+            ##################################################################
+            #                        POST-CLIENT SELECTION
+            ##################################################################
             if self.args.method not in PRE_SELECTION_METHOD:
                 logger.info(f'Post-client selection {self.num_clients_per_round}/{len(client_indices)}')
                 kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
@@ -220,70 +228,45 @@ class Server(object):
             # self.weight_variance(local_models) # check variance of client weights
             self.save_current_updates(local_losses, accuracy, len(client_indices), phase='Train', round=round_idx)
             self.save_selected_clients(round_idx, client_indices)
-
-            ## SERVER AGGREGATION
             # DEBUGGING
             if self.args.method not in ["PBFL", "FedCorr"]:
                 assert len(client_indices) == self.num_clients_per_round, \
                     (len(client_indices), self.num_clients_per_round)
-                        
-            # aggregate local models
-            local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
-            if self.args.fed_algo == 'FedAvg':
-                global_model_params = self.federated_method.update(local_models, client_indices)
-            else:
-                global_model_params = self.federated_method.update(local_models, client_indices, self.global_model, self.client_list)
-            
-            # update aggregated model to global model
-            self.global_model.load_state_dict(global_model_params)
-            
-            if self.args.method == "FedCorr":
-                if self.selection_method.stage == 1:
-                    ### warmup phase
-                    for client_id in engated_client_indices:
-                        client = self.client_list[client_id]
-                        output_array, loss_array = client.elementwise_test(self.global_model, test_on_training_data=True)
-                        self.selection_method.warmup_sub_iter_summary(client_id, output_array, loss_array)
                     
-                    if self.selection_method.warmup_iter_end:
-                        self.selection_method.warmup_iter_summary()
-                        if self.selection_method.correction:
-                            for idx in self.noisy_set:
-                                client = self.client_list[idx]
-                                output_array, loss_array = client.elementwise_test(self.global_model, test_on_training_data=True)
-                                self.selection_method.correct_dataset(idx, output_array, loss_array)
-                elif self.selection_method.stage == 2:
-                    if self.selection_method.finetune_end:
-                        if self.selection_method.correction:
-                            for idx in self.noisy_set:
-                                client = self.client_list[idx]
-                                output_array, loss_array = client.elementwise_test(self.global_model, test_on_training_data=True)
-                                self.selection_method.correct_dataset(idx, output_array, loss_array)
-                        self.selection_method.end_finetune()
-                elif self.selection_method.stage == 3:
-                    pass
-                else:
-                    raise
-                    
-            ## TEST
-            # if round_idx % self.args.test_freq == 0:
+            ##################################################################
+            #                        SERVER AGGREGATION
+            ##################################################################
+            self.aggregate_model(client_indices)
+            
+            ##################################################################
+            #                        POST-process for each selection method
+            ##################################################################
+            self.selection_method.post_process(engaged_client_indices)
+            
+            ##################################################################
+            #                        TEST
+            ##################################################################  
             self.global_model.eval()
-            # test on train dataset
             if self.test_on_training_data:
+                # test on train dataset
+                raise ValueError("Why should we test on the training data")
                 self.test(self.total_num_client, phase='TrainALL')
                 self.test_on_training_data = False
             # test on test dataset
             result = self.global_test()
+            local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
             if self.args.method == "PBFL":
                 self.selection_method.global_loss = result["loss"]
                 self.selection_method.global_accu = result["acc"]
                 self.selection_method.post_update(client_indices, local_models, self.global_model)
-
             # self.test(len(self.test_clients), phase='Test')
             phase='Test'
             self.record[f'{phase}/Loss'] = result["loss"]
             self.record[f'{phase}/Acc'] = result["acc"]
 
+            ##################################################################
+            #                        Record log info 
+            ##################################################################  
             if self.args.method == "FedCorr":
                 logger.info('[{}] {}ing: Loss {:.6f} Acc {:.4f}'.format(
                     self.selection_method.stage_name, phase, result["loss"], result["acc"]))
@@ -295,16 +278,29 @@ class Server(object):
 
             ## Clear garbages
             del local_models, local_losses, accuracy
-            for client_idx in engated_client_indices:
+            for client_idx in engaged_client_indices:
                 self.client_list[client_idx].trainer.clear_model()
 
         for k in self.files:
             if self.files[k] is not None:
                 self.files[k].close()
 
+    def aggregate_model(self, selected_client_idxs):
+        # aggregate local models
+        local_models = [self.client_list[idx].trainer.get_model() for idx in selected_client_idxs]
+        if self.args.fed_algo == 'FedAvg':
+            global_model_params = self.federated_method.update(local_models, selected_client_idxs)
+        else:
+            global_model_params = self.federated_method.update(
+                local_models, selected_client_idxs, self.global_model, self.client_list)
+        
+        # update aggregated model to global model
+        self.global_model.load_state_dict(global_model_params)
+        del local_models
+            
     def local_training(self, client_idx):
         """
-        train one client
+        train one client with the global model
         ---
         Args
             client_idx: client index for training
@@ -322,21 +318,23 @@ class Server(object):
             result = client.train(self.global_model)
         return result
 
-    def local_testing(self, client_idx):
+    def local_testing(self, client_idx, use_local_model=False):
         """
-        test one client
+        test one client with the global model
         ---
         Args
             client_idx: client index for test
             results: loss, acc, auc
         """
         client = self.client_list[client_idx]
-        result = client.test(self.global_model, self.test_on_training_data)
+        result = client.test(self.global_model, self.test_on_training_data,
+                            use_local_model=use_local_model)
         return result
 
     def train_clients(self, client_indices):
         """
-        train multiple clients (w. or w.o. multi processing)
+        train multiple clients (w. or w.o. multi processing) with 
+        the global model
         ---
         Args
             client_indices: client indices for training
@@ -384,41 +382,65 @@ class Server(object):
 
         return local_losses, accuracy, local_metrics
 
-    def test(self, num_clients_for_test, phase='Test'):
+    def test(self, num_clients_for_test, phase='Test', save=True, 
+             use_local_model=False):
         """
-        test multiple clients
+        test multiple clients on their respective dataset
         ---
         Args
-            num_clients_for_test: number of clients for test
+            num_clients_for_test: int or numpy or list
+                number of clients for test
+                
             TrainALL: test on train dataset
             Test: test on test dataset
         """
+        
+        if isinstance(num_clients_for_test, int):
+            ### TODO (huhanpeng): remove this assertation
+            assert num_clients_for_test == self.total_num_client
+            clients_to_test = list(range(num_clients_for_test))
+        else:
+            assert save is False, ("Do not support to save test"
+                "results with partial of the clients")
+            clients_to_test = list(num_clients_for_test)
+        
         metrics = {'loss': [], 'acc': []}
         if self.args.use_mp:
             iter = 0
             with mp.pool.ThreadPool(processes=self.nCPU) as pool:
                 iter += 1
-                result = list(tqdm(pool.imap(self.local_testing, [*range(num_clients_for_test)]),
+                result = list(tqdm(pool.imap(self.local_testing, [*clients_to_test], use_local_model),
                                    desc=f'>> local testing on {phase} set'))
-
                 result = {k: [result[idx][k] for idx in range(len(result))] for k in result[0].keys()}
                 metrics['loss'].extend(result['loss'])
                 metrics['acc'].extend(result['acc'])
-
                 # progressBar(len(metrics['acc']) * iter, num_clients_for_test, phase='Test',
                 #             result={'loss': sum(result['loss']) / len(result), 'acc': sum(result['acc']) / len(result)})
         else:
-            for client_idx in range(num_clients_for_test):
-                result = self.local_testing(client_idx)
-
+            for client_idx in clients_to_test:
+                result = self.local_testing(client_idx, 
+                                    use_local_model=use_local_model)
                 metrics['loss'].append(result['loss'])
                 metrics['acc'].append(result['acc'])
-
                 # progressBar(len(metrics['acc']), num_clients_for_test, result, phase='Test')
+        if save:
+            self.save_current_updates(metrics['loss'], metrics['acc'], num_clients_for_test, phase=phase)
+        return metrics
 
-        self.save_current_updates(metrics['loss'], metrics['acc'], num_clients_for_test, phase=phase)
-
-
+    def try_federated_learning(self, client_indices):
+        ''' Try to train selected clients without affect the 
+        global model.
+            return the test resutls, including the average 
+            accuracy and the list of loss on each client's test data
+        '''
+        _global_model = copy.deepcopy(self.global_model)
+        self.train_clients(client_indices)
+        self.aggregate_model(client_indices)
+        # metrics = self.test(client_indices, phase='Test', 
+        #                 save=False, use_local_model=False)
+        self.global_model = _global_model
+        # return metrics
+        
     def save_current_updates(self, losses, accs, num_clients, phase='Train', round=None):
         """
         update current updated results for recording
@@ -483,7 +505,6 @@ class Server(object):
             variance += torch.var(torch.tensor(tmp), dim=0)
         variance /= len(local_models)
         logger.info('variance of model weights {:.8f}'.format(variance))
-
 
 
 def progressBar(idx, total, result, phase='Train', bar_length=20):

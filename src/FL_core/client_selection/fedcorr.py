@@ -199,4 +199,31 @@ class FedCorr(ClientSelection):
         self.stage = 3
         self.m = max(int(self.finetune_frac * self.total), 1)  # num_select_clients
         self.prob = [1/self.total for i in range(self.total)]
-        
+    
+    def post_process(self, engaged_client_indices):
+        if self.stage == 1:
+            ### warmup phase
+            for client_id in engaged_client_indices:
+                client = self.server.client_list[client_id]
+                output_array, loss_array = client.elementwise_test(self.server.global_model, test_on_training_data=True)
+                self.warmup_sub_iter_summary(client_id, output_array, loss_array)
+            
+            if self.warmup_iter_end:
+                self.warmup_iter_summary()
+                if self.correction:
+                    for idx in self.noisy_set:
+                        client = self.server.client_list[idx]
+                        output_array, loss_array = client.elementwise_test(self.server.global_model, test_on_training_data=True)
+                        self.correct_dataset(idx, output_array, loss_array)
+        elif self.stage == 2:
+            if self.finetune_end:
+                if self.correction:
+                    for idx in self.noisy_set:
+                        client = self.server.client_list[idx]
+                        output_array, loss_array = client.elementwise_test(self.server.global_model, test_on_training_data=True)
+                        self.correct_dataset(idx, output_array, loss_array)
+                self.end_finetune()
+        elif self.stage == 3:
+            pass
+        else:
+            raise

@@ -56,9 +56,9 @@ def client_selection_method(args):
     elif args.method == 'GradNorm':
         return GradNorm(**kwargs)
     elif args.method == 'PBFL':
-        return Proj_Bandit(**kwargs)
-    elif args.method == "FedCorr":
-        return FedCorr(args, **kwargs)
+        return Proj_Bandit(args, **kwargs)
+    elif args.method == "FedCor":
+        return FedCor(args, **kwargs)
     elif args.method == "Single":
         args.total_num_client = args.num_clients_per_round = 1
         return SingleSelection(**kwargs)

@@ -5,6 +5,7 @@ class ClientSelection:
     def __init__(self, total, device):
         self.total = total
         self.device = device
+        self.server = None
 
     def select(self, n, client_idxs, metric):
         pass
@@ -19,6 +20,9 @@ class ClientSelection:
         results.write(prefix)
         np.array(arr).astype(np.float32).tofile(results, sep=',')
         results.write("\n")
+    
+    def post_process(self, engaged_client_indices):
+        pass
 
 
 

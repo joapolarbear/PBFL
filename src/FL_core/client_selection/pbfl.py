@@ -12,7 +12,7 @@ import atexit
 from utils import logger
 
 class Proj_Bandit(ClientSelection):
-    def __init__(self, total, device):
+    def __init__(self, args, total, device):
         super().__init__(total, device)
 
         self.client2rewards = []
@@ -27,8 +27,11 @@ class Proj_Bandit(ClientSelection):
         self.global_accu = 0
         self.global_loss = 1e6
         
-        self.warmup_bound = 20
+        self.args = args
+        
+        self.warmup_bound = args.warmup
         self.warmup_frac = 1 / self.warmup_bound
+        self.prob = [1 / self.total] * self.total
         
         # signal.signal(signal.SIGINT, self.signal_handler)
         # signal.signal(signal.SIGTERM, self.signal_handler)
@@ -119,6 +122,10 @@ class Proj_Bandit(ClientSelection):
 
         self.update_proj_list(client_idxs, global_m, local_models, improved)
 
+    def fix_prob(self):
+        ### Make the sum of self.prob to 1
+        self.prob = [self.prob[i] / sum(self.prob) for i in range(len(self.prob))]
+
     def select(self, n, client_idxs, metric, round=0, results=None):
         # pre-select
         '''
@@ -126,13 +133,15 @@ class Proj_Bandit(ClientSelection):
         Args
             metric: local_gradients
         '''
-        
-        
         if self.client_update_cnt < self.warmup_bound:
             MAX_SELECTED_NUM = math.ceil(self.total * self.warmup_frac)
             logger.info(f"> PBFL warmup {self.client_update_cnt}")
             selected_client_index = np.random.choice(
-                self.total, MAX_SELECTED_NUM, replace=False)
+                self.total, MAX_SELECTED_NUM, p=self.prob, replace=False)
+            for client_id in selected_client_index:
+                self.prob[client_id] = 0
+            if sum(self.prob) > 0:
+                self.fix_prob()
             # st = self.client_update_cnt * MAX_SELECTED_NUM
             # ed = st + MAX_SELECTED_NUM
             # ed = min(ed, self.total)

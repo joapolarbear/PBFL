@@ -58,14 +58,16 @@ class Client(object):
         
         return result
 
-    def test(self, model, test_on_training_data=False):
+    def test(self, model, test_on_training_data=False, use_local_model=False):
         # TEST
         if test_on_training_data:
             # test on training dataset
-            result = self.trainer.test(model, self.labeled_data)
+            result = self.trainer.test(model, self.labeled_data, 
+                                       use_local_model=use_local_model)
         else:
             # test on test dataset
-            result = self.trainer.test(model, self.test_data)
+            result = self.trainer.test(model, self.test_data,
+                                       use_local_model=use_local_model)
         return result
 
     def elementwise_test(self, model, test_on_training_data=False):
