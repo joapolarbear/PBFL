@@ -1,14 +1,14 @@
 #!/bin/bash
 
-MODEL=CNN
+MODEL=MLP
 # MODEL=RESNET18
-BATCH_SIZE=50
-TRAIN_ROUND=1000
-NUM_CLIENT_PER_ROUND=5
+BATCH_SIZE=64
+TRAIN_ROUND=500
+NUM_CLIENT_PER_ROUND=10
 TOTAL_CLIENT_NUM=100
-LOCAL_EP=5
+LOCAL_EP=3
 
-DATASET=cifar
+DATASET=fmnist
 
 
 DATADIR=./data
@@ -20,14 +20,13 @@ for METHOD in ${METHODS[@]}; do
         --model ${MODEL} \
         -A ${NUM_CLIENT_PER_ROUND} \
         -K ${TOTAL_CLIENT_NUM} \
-        --lr_local 0.01 --lr_decay=1.0 --wdecay=3e-4 \
+        --lr_local 5e-3 --lr_decay=0.5 --wdecay=1e-4 \
         -E $LOCAL_EP \
         -B ${BATCH_SIZE} -R ${TRAIN_ROUND} -d 10 \
         --method ${METHOD} \
         --data_dir ${DATADIR} \
         --iid 0 --unequal=0 \
         --shards_per_client 1 \
-        # --dirichlet_alpha 0.2 \
         --poly_norm=0 --update_mean --warmup=20 \
         --group_size=500 --GPR_gamma=0.99 \
         --discount=0.9 --GPR_interval=50 \

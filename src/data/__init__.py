@@ -46,13 +46,13 @@ def load_data(args):
         for client_idx in range(args.num_users):
            
             data_idxs: set = user_groups[client_idx]
-            data_x, data_y = zip(*[train_dataset[i] for i in data_idxs])
+            data_x, data_y = zip(*[train_dataset[int(i)] for i in data_idxs])
             local_data = TensorDataset(torch.stack(data_x), torch.Tensor(data_y))
             train_data_local_dict[client_idx] = local_data
             train_data_local_num_dict[client_idx] = len(data_x)
             
             data_idxs: set = user_groups_test[client_idx]
-            data_x, data_y = zip(*[test_dataset[i] for i in data_idxs])
+            data_x, data_y = zip(*[test_dataset[int(i)] for i in data_idxs])
             local_data = TensorDataset(torch.stack(data_x), torch.Tensor(data_y))
             test_data_local_dict[client_idx] = local_data
             test_data_local_num_dict[client_idx] = len(data_x)
