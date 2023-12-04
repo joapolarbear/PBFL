@@ -4,3 +4,4 @@ wandb/
 *__pycache__/
 .log
 /data
+*.pkl

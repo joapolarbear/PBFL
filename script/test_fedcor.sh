@@ -3,8 +3,8 @@
 MODEL=MLP
 # MODEL=RESNET18
 BATCH_SIZE=64
-TRAIN_ROUND=500
-NUM_CLIENT_PER_ROUND=10
+TRAIN_ROUND=2000
+NUM_CLIENT_PER_ROUND=5
 TOTAL_CLIENT_NUM=100
 LOCAL_EP=3
 
@@ -26,13 +26,14 @@ for METHOD in ${METHODS[@]}; do
         --method ${METHOD} \
         --data_dir ${DATADIR} \
         --iid 0 --unequal=0 \
-        --shards_per_client 1 \
+        --dirichlet_alpha=0.2 \
         --poly_norm=0 --update_mean --warmup=20 \
         --group_size=500 --GPR_gamma=0.99 \
         --discount=0.9 --GPR_interval=50 \
         $@
 done
 
+        # --shards_per_client 1 \
 
 # CURDIRNAME=$(dirname $0)
 # export WANDB_LOG_PATH=$(realpath $CURDIRNAME/../../)

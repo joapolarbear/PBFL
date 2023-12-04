@@ -92,8 +92,10 @@ class Proj_Bandit(ClientSelection):
         # print("Proj", momemtum_based_grad_proj)
         assert isinstance(self.client2proj, list) or isinstance(self.client2proj, np.ndarray)
         # assert len(self.client2proj) == num_of_client
-
-        alpha = a/800
+        if a<100:
+            alpha = a/100
+        else:
+            alpha = 200/(a+100)
         
         ucb = self.client2proj + alpha * np.sqrt(
             (2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
