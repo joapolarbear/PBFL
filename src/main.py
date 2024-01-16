@@ -15,17 +15,14 @@ import torch
 import random
 
 import utils
-
-utils.init(".", "pbfl")
+args = utils.init(".", "pbfl")
+from utils import logger
 
 from data import load_data
 from model import create_model
 from FL_core.server import Server
 from FL_core.client_selection import *
 from FL_core.federated_algorithm import *
-
-from utils import logger
-from utils.argparse import get_args
 
 
 def federated_algorithm(dataset, model, args):
@@ -68,8 +65,6 @@ def client_selection_method(args):
 
 
 if __name__ == '__main__':
-    # set up
-    args = get_args()
     if args.comment != '': args.comment = '-'+args.comment
     #if args.labeled_ratio < 1: args.comment = f'-L{args.labeled_ratio}{args.comment}'
     if args.fed_algo != 'FedAvg': args.comment = f'-{args.fed_algo}{args.comment}'

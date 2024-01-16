@@ -1,5 +1,6 @@
 import logging
 import os, sys
+import time
 
 LOG_LEVEL_NAME = ["DEBUG", "INFO", "WARNING", "ERROR", "FATAL"]
 
@@ -17,13 +18,23 @@ else:
     _srcfile = __file__
 _srcfile = os.path.normcase(_srcfile)
 
+class RelativeSeconds(logging.Formatter):
+    def format(self, record):
+        # record.relativeCreated = record.relativeCreated // 1000
+        record.delta = record.relativeCreated / 1000
+        return super().format(record)
+    
 class Logger:
-    def __init__(self, path, name, logging_level="INFO", is_clean=False, show_progress=False):
-        dirname = path if os.path.isdir(path) else os.path.dirname(path)
-        dirname = os.path.join(path, ".log")
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-        logfile = os.path.join(dirname, "log_option-" + name + ".txt")
+    def __init__(self, args, path, name, logging_level="INFO", is_clean=False, show_progress=False):
+        exp_name = os.environ.get("PBFL_EXP_NAME", None)
+        if exp_name is not None:
+            logfile = exp_name + "-log.txt"
+        else:
+            dirname = path if os.path.isdir(path) else os.path.dirname(path)
+            dirname = os.path.join(path, ".log")
+            if not os.path.exists(dirname):
+                os.makedirs(dirname)
+            logfile = os.path.join(dirname, f"log_option-{args.method.lower()}.txt")
         if is_clean and os.path.exists(logfile):
             os.remove(logfile)
         #! config logging
@@ -41,7 +52,7 @@ class Logger:
             _log_level = logging.INFO
         self.logger.setLevel(level=_log_level)
 
-        formatter = logging.Formatter('[%(asctime)s] [%(filename)s:%(lineno)d] %(levelname)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
+        formatter = RelativeSeconds('[%(asctime)s(+%(delta)ss)] [%(filename)s:%(lineno)d] %(levelname)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
 
         #! bind some file stream
         handler = logging.FileHandler(logfile)

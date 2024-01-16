@@ -165,6 +165,11 @@ class Server(object):
                 # np.random.seed((self.args.seed+1)*10000000 + round_idx)
                 logger.info(f'Candidate client selection {self.args.num_candidates}/{len(client_indices)}')
                 client_indices = self.selection_method.select_candidates(client_indices, self.args.num_candidates)
+                THRESHOLD = 10
+                if len(client_indices) <= THRESHOLD:
+                    logger.info(f'Selected clients: [{", ".join(client_indices)}]')
+                else:
+                    logger.info(f'Selected clients: [{", ".join(client_indices[:THRESHOLD])} ... ]')
 
             ##################################################################
             #                        PRE-CLIENT SELECTION

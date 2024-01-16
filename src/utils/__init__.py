@@ -44,8 +44,12 @@ def save_files(args):
 
 logger = None
 
+from utils.argparse import get_args
+
 def init(log_dir, log_name):
     global logger
-    logger = Logger(log_dir, log_name)
+    args = get_args()
+    logger = Logger(args, log_dir, log_name)
+    return args
     
     
