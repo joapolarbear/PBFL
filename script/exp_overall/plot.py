@@ -20,9 +20,9 @@ def smooth(scalars: List[float], weight: float) -> List[float]:
 fontsize = 28
 policy2attr = {
     "GPFL": ('r'), 
-    "Pow-d": ('g'), 
-    "Random": ('b'), 
-    "FedCor": ('black')
+    "Pow-d": ('purple'), 
+    "Random": ('g'), 
+    "FedCor": ('b')
 }
 
 def handle_one_file(_file):
