@@ -1,0 +1,275 @@
+[2024-01-16 03:44:20(+3.0038859844207764s)] [main.py:101] INFO - Current cuda device 0
+[2024-01-16 03:44:21(+3.6330759525299072s)] [__init__.py:35] INFO - Load cached dataset from ./data/cifar_N100_alpha0.2_noniid_1shard-per-client_eq.pickle
+[2024-01-16 03:44:21(+3.7149736881256104s)] [main.py:111] WARNING - data.test_num_clients will be deprecated
+[2024-01-16 03:44:23(+6.1138153076171875s)] [server.py:100] INFO - Global test data size: 10000
+[2024-01-16 03:44:23(+6.127577304840088s)] [server.py:130] INFO - ROUND 0
+[2024-01-16 03:44:23(+6.1279942989349365s)] [fedcor.py:103] INFO - > FedCor warmup 0
+[2024-01-16 03:44:23(+6.128223419189453s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:23(+6.128376007080078s)] [server.py:193] INFO - Selected clients: [0, 14, 40, 56, 59]
+[2024-01-16 03:44:24(+6.895013332366943s)] [server.py:466] INFO - 5 Clients Training: Loss 1.280605 Acc 0.9284
+[2024-01-16 03:44:25(+7.593374967575073s)] [server.py:274] INFO - Testing: Loss 2.328056 Acc 0.1002
+[2024-01-16 03:44:25(+7.594032287597656s)] [server.py:130] INFO - ROUND 1
+[2024-01-16 03:44:25(+7.594325065612793s)] [fedcor.py:103] INFO - > FedCor warmup 1
+[2024-01-16 03:44:25(+7.594532251358032s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:25(+7.594674348831177s)] [server.py:193] INFO - Selected clients: [14, 77, 81, 96, 97]
+[2024-01-16 03:44:26(+8.50920557975769s)] [server.py:466] INFO - 5 Clients Training: Loss 0.449358 Acc 0.8061
+[2024-01-16 03:44:26(+9.168787956237793s)] [server.py:274] INFO - Testing: Loss 2.590537 Acc 0.1000
+[2024-01-16 03:44:26(+9.169388771057129s)] [server.py:130] INFO - ROUND 2
+[2024-01-16 03:44:26(+9.169689655303955s)] [fedcor.py:103] INFO - > FedCor warmup 2
+[2024-01-16 03:44:26(+9.169912815093994s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:26(+9.170066833496094s)] [server.py:193] INFO - Selected clients: [10, 52, 7, 79, 88]
+[2024-01-16 03:44:27(+10.263277769088745s)] [server.py:466] INFO - 5 Clients Training: Loss 0.515104 Acc 0.7573
+[2024-01-16 03:44:28(+10.947380065917969s)] [server.py:274] INFO - Testing: Loss 2.827752 Acc 0.1000
+[2024-01-16 03:44:28(+10.94797945022583s)] [server.py:130] INFO - ROUND 3
+[2024-01-16 03:44:28(+10.948265790939331s)] [fedcor.py:103] INFO - > FedCor warmup 3
+[2024-01-16 03:44:28(+10.948472738265991s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:28(+10.948618412017822s)] [server.py:193] INFO - Selected clients: [0, 11, 19, 27, 70]
+[2024-01-16 03:44:29(+11.72281289100647s)] [server.py:466] INFO - 5 Clients Training: Loss 0.205073 Acc 0.8969
+[2024-01-16 03:44:29(+12.403913021087646s)] [server.py:274] INFO - Testing: Loss 2.872936 Acc 0.1000
+[2024-01-16 03:44:29(+12.404498100280762s)] [server.py:130] INFO - ROUND 4
+[2024-01-16 03:44:29(+12.404785633087158s)] [fedcor.py:103] INFO - > FedCor warmup 4
+[2024-01-16 03:44:29(+12.404993295669556s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:29(+12.405136585235596s)] [server.py:193] INFO - Selected clients: [21, 23, 59, 65, 81]
+[2024-01-16 03:44:31(+13.41989016532898s)] [server.py:466] INFO - 5 Clients Training: Loss 0.466733 Acc 0.7957
+[2024-01-16 03:44:31(+14.108065843582153s)] [server.py:274] INFO - Testing: Loss 2.541330 Acc 0.1000
+[2024-01-16 03:44:31(+14.108734130859375s)] [server.py:130] INFO - ROUND 5
+[2024-01-16 03:44:31(+14.109051704406738s)] [fedcor.py:103] INFO - > FedCor warmup 5
+[2024-01-16 03:44:31(+14.109285831451416s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:31(+14.109448432922363s)] [server.py:193] INFO - Selected clients: [21, 25, 40, 49, 62]
+[2024-01-16 03:44:32(+14.800063133239746s)] [server.py:466] INFO - 5 Clients Training: Loss 0.362287 Acc 0.8426
+[2024-01-16 03:44:33(+15.490252494812012s)] [server.py:274] INFO - Testing: Loss 3.510557 Acc 0.1000
+[2024-01-16 03:44:33(+15.490904808044434s)] [server.py:130] INFO - ROUND 6
+[2024-01-16 03:44:33(+15.491220474243164s)] [fedcor.py:103] INFO - > FedCor warmup 6
+[2024-01-16 03:44:33(+15.491444826126099s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:33(+15.491614818572998s)] [server.py:193] INFO - Selected clients: [16, 29, 33, 75, 82]
+[2024-01-16 03:44:34(+16.639711141586304s)] [server.py:466] INFO - 5 Clients Training: Loss 0.134206 Acc 0.9689
+[2024-01-16 03:44:34(+17.327452182769775s)] [server.py:274] INFO - Testing: Loss 2.629516 Acc 0.1442
+[2024-01-16 03:44:34(+17.328078985214233s)] [server.py:130] INFO - ROUND 7
+[2024-01-16 03:44:34(+17.328394889831543s)] [fedcor.py:103] INFO - > FedCor warmup 7
+[2024-01-16 03:44:34(+17.328625202178955s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:34(+17.328784704208374s)] [server.py:193] INFO - Selected clients: [19, 47, 56, 65, 79]
+[2024-01-16 03:44:35(+18.191936492919922s)] [server.py:466] INFO - 5 Clients Training: Loss 0.442147 Acc 0.7783
+[2024-01-16 03:44:36(+18.883973121643066s)] [server.py:274] INFO - Testing: Loss 3.558642 Acc 0.1000
+[2024-01-16 03:44:36(+18.88466167449951s)] [server.py:130] INFO - ROUND 8
+[2024-01-16 03:44:36(+18.884995698928833s)] [fedcor.py:103] INFO - > FedCor warmup 8
+[2024-01-16 03:44:36(+18.885241508483887s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:36(+18.885409116744995s)] [server.py:193] INFO - Selected clients: [16, 56, 70, 76, 8]
+[2024-01-16 03:44:37(+19.59151864051819s)] [server.py:466] INFO - 5 Clients Training: Loss 0.147840 Acc 0.9676
+[2024-01-16 03:44:37(+20.258408784866333s)] [server.py:274] INFO - Testing: Loss 2.649715 Acc 0.1280
+[2024-01-16 03:44:37(+20.25903296470642s)] [server.py:130] INFO - ROUND 9
+[2024-01-16 03:44:37(+20.259340286254883s)] [fedcor.py:103] INFO - > FedCor warmup 9
+[2024-01-16 03:44:37(+20.25956630706787s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:37(+20.25972080230713s)] [server.py:193] INFO - Selected clients: [12, 14, 36, 75, 92]
+[2024-01-16 03:44:38(+21.035712480545044s)] [server.py:466] INFO - 5 Clients Training: Loss 0.246926 Acc 0.8769
+[2024-01-16 03:44:39(+21.726430416107178s)] [server.py:274] INFO - Testing: Loss 3.117937 Acc 0.1031
+[2024-01-16 03:44:39(+21.72710943222046s)] [server.py:130] INFO - ROUND 10
+[2024-01-16 03:44:39(+21.727436304092407s)] [fedcor.py:103] INFO - > FedCor warmup 10
+[2024-01-16 03:44:39(+21.727678298950195s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:39(+21.72784399986267s)] [server.py:193] INFO - Selected clients: [46, 54, 67, 83, 85]
+[2024-01-16 03:44:40(+22.7983238697052s)] [server.py:466] INFO - 5 Clients Training: Loss 0.384567 Acc 0.8625
+[2024-01-16 03:44:41(+23.490973949432373s)] [server.py:274] INFO - Testing: Loss 2.644892 Acc 0.1000
+[2024-01-16 03:44:41(+23.49164319038391s)] [server.py:130] INFO - ROUND 11
+[2024-01-16 03:44:41(+23.491966485977173s)] [fedcor.py:103] INFO - > FedCor warmup 11
+[2024-01-16 03:44:41(+23.492204904556274s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:41(+23.49237060546875s)] [server.py:193] INFO - Selected clients: [34, 37, 41, 85, 87]
+[2024-01-16 03:44:42(+24.66800308227539s)] [server.py:466] INFO - 5 Clients Training: Loss 0.421330 Acc 0.8313
+[2024-01-16 03:44:42(+25.349841117858887s)] [server.py:274] INFO - Testing: Loss 3.194509 Acc 0.1000
+[2024-01-16 03:44:42(+25.350488424301147s)] [server.py:130] INFO - ROUND 12
+[2024-01-16 03:44:42(+25.350801944732666s)] [fedcor.py:103] INFO - > FedCor warmup 12
+[2024-01-16 03:44:42(+25.351032495498657s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:42(+25.351195335388184s)] [server.py:193] INFO - Selected clients: [0, 26, 36, 45, 83]
+[2024-01-16 03:44:44(+26.720514059066772s)] [server.py:466] INFO - 5 Clients Training: Loss 0.031496 Acc 0.9959
+[2024-01-16 03:44:45(+27.43593978881836s)] [server.py:274] INFO - Testing: Loss 3.561656 Acc 0.1000
+[2024-01-16 03:44:45(+27.4366352558136s)] [server.py:130] INFO - ROUND 13
+[2024-01-16 03:44:45(+27.43702983856201s)] [fedcor.py:103] INFO - > FedCor warmup 13
+[2024-01-16 03:44:45(+27.43730616569519s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:45(+27.43751835823059s)] [server.py:193] INFO - Selected clients: [33, 46, 48, 63, 83]
+[2024-01-16 03:44:46(+28.78538227081299s)] [server.py:466] INFO - 5 Clients Training: Loss 0.302143 Acc 0.8685
+[2024-01-16 03:44:47(+29.476946592330933s)] [server.py:274] INFO - Testing: Loss 2.914936 Acc 0.1000
+[2024-01-16 03:44:47(+29.47769069671631s)] [server.py:130] INFO - ROUND 14
+[2024-01-16 03:44:47(+29.478102207183838s)] [fedcor.py:103] INFO - > FedCor warmup 14
+[2024-01-16 03:44:47(+29.478418111801147s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:47(+29.478639602661133s)] [server.py:193] INFO - Selected clients: [0, 5, 84, 92, 98]
+[2024-01-16 03:44:47(+30.283204793930054s)] [server.py:466] INFO - 5 Clients Training: Loss 0.279779 Acc 0.8777
+[2024-01-16 03:44:48(+30.976186275482178s)] [server.py:274] INFO - Testing: Loss 3.349158 Acc 0.1000
+[2024-01-16 03:44:48(+30.976916313171387s)] [server.py:130] INFO - ROUND 15
+[2024-01-16 03:44:48(+30.977328538894653s)] [fedcor.py:103] INFO - > FedCor warmup 15
+[2024-01-16 03:44:48(+30.9776291847229s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:48(+30.977850437164307s)] [server.py:193] INFO - Selected clients: [17, 26, 62, 82, 92]
+[2024-01-16 03:44:49(+32.389002561569214s)] [server.py:466] INFO - 5 Clients Training: Loss 0.281478 Acc 0.8803
+[2024-01-16 03:44:50(+33.07949924468994s)] [server.py:274] INFO - Testing: Loss 3.231948 Acc 0.1000
+[2024-01-16 03:44:50(+33.08019542694092s)] [server.py:130] INFO - ROUND 16
+[2024-01-16 03:44:50(+33.08059859275818s)] [fedcor.py:103] INFO - > FedCor warmup 16
+[2024-01-16 03:44:50(+33.080891370773315s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:50(+33.081108808517456s)] [server.py:193] INFO - Selected clients: [18, 25, 75, 81, 96]
+[2024-01-16 03:44:51(+34.12172532081604s)] [server.py:466] INFO - 5 Clients Training: Loss 0.253499 Acc 0.8979
+[2024-01-16 03:44:52(+34.81532073020935s)] [server.py:274] INFO - Testing: Loss 3.057754 Acc 0.1000
+[2024-01-16 03:44:52(+34.81606483459473s)] [server.py:130] INFO - ROUND 17
+[2024-01-16 03:44:52(+34.81647872924805s)] [fedcor.py:103] INFO - > FedCor warmup 17
+[2024-01-16 03:44:52(+34.81677865982056s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:52(+34.81700110435486s)] [server.py:193] INFO - Selected clients: [25, 35, 39, 58, 97]
+[2024-01-16 03:44:53(+35.899691581726074s)] [server.py:466] INFO - 5 Clients Training: Loss 0.314003 Acc 0.8387
+[2024-01-16 03:44:54(+36.63175106048584s)] [server.py:274] INFO - Testing: Loss 2.695198 Acc 0.1000
+[2024-01-16 03:44:54(+36.6324245929718s)] [server.py:130] INFO - ROUND 18
+[2024-01-16 03:44:54(+36.63274812698364s)] [fedcor.py:103] INFO - > FedCor warmup 18
+[2024-01-16 03:44:54(+36.63298010826111s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:54(+36.63314437866211s)] [server.py:193] INFO - Selected clients: [18, 24, 38, 48, 72]
+[2024-01-16 03:44:55(+38.00312542915344s)] [server.py:466] INFO - 5 Clients Training: Loss 0.472392 Acc 0.7860
+[2024-01-16 03:44:56(+38.68692994117737s)] [server.py:274] INFO - Testing: Loss 3.579808 Acc 0.1034
+[2024-01-16 03:44:56(+38.68755125999451s)] [server.py:130] INFO - ROUND 19
+[2024-01-16 03:44:56(+38.68784856796265s)] [fedcor.py:103] INFO - > FedCor warmup 19
+[2024-01-16 03:44:56(+38.6880669593811s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:44:56(+38.68821859359741s)] [server.py:193] INFO - Selected clients: [0, 25, 84, 89, 96]
+[2024-01-16 03:44:57(+39.478737354278564s)] [server.py:466] INFO - 5 Clients Training: Loss 0.194207 Acc 0.9161
+[2024-01-16 03:47:08(+171.12844610214233s)] [server.py:274] INFO - Testing: Loss 2.601457 Acc 0.1005
+[2024-01-16 03:47:08(+171.1290683746338s)] [server.py:130] INFO - ROUND 20
+[2024-01-16 03:47:08(+171.12937378883362s)] [fedcor.py:103] INFO - > FedCor warmup 20
+[2024-01-16 03:47:08(+171.12959146499634s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:08(+171.12974166870117s)] [server.py:193] INFO - Selected clients: [42, 49, 69, 80, 99]
+[2024-01-16 03:47:10(+172.43627762794495s)] [server.py:466] INFO - 5 Clients Training: Loss 0.261061 Acc 0.9272
+[2024-01-16 03:47:11(+173.4913351535797s)] [server.py:274] INFO - Testing: Loss 2.590839 Acc 0.1340
+[2024-01-16 03:47:11(+173.4919469356537s)] [server.py:130] INFO - ROUND 21
+[2024-01-16 03:47:11(+173.49510288238525s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:11(+173.49525332450867s)] [server.py:193] INFO - Selected clients: [21, 4, 44, 83, 88]
+[2024-01-16 03:47:12(+174.7625150680542s)] [server.py:466] INFO - 5 Clients Training: Loss 0.539630 Acc 0.7410
+[2024-01-16 03:47:13(+175.4727282524109s)] [server.py:274] INFO - Testing: Loss 3.113867 Acc 0.1485
+[2024-01-16 03:47:13(+175.4734320640564s)] [server.py:130] INFO - ROUND 22
+[2024-01-16 03:47:13(+175.47669959068298s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:13(+175.47689127922058s)] [server.py:193] INFO - Selected clients: [15, 48, 51, 62, 98]
+[2024-01-16 03:47:14(+176.71637415885925s)] [server.py:466] INFO - 5 Clients Training: Loss 0.246611 Acc 0.8998
+[2024-01-16 03:47:15(+177.43980836868286s)] [server.py:274] INFO - Testing: Loss 2.548875 Acc 0.1001
+[2024-01-16 03:47:15(+177.44050312042236s)] [server.py:130] INFO - ROUND 23
+[2024-01-16 03:47:15(+177.44377613067627s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:15(+177.44397401809692s)] [server.py:193] INFO - Selected clients: [25, 4, 68, 89, 91]
+[2024-01-16 03:47:15(+178.30737447738647s)] [server.py:466] INFO - 5 Clients Training: Loss 0.396385 Acc 0.8093
+[2024-01-16 03:47:16(+178.98819732666016s)] [server.py:274] INFO - Testing: Loss 3.142212 Acc 0.1005
+[2024-01-16 03:47:16(+178.98894929885864s)] [server.py:130] INFO - ROUND 24
+[2024-01-16 03:47:16(+178.9924430847168s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:16(+178.9926619529724s)] [server.py:193] INFO - Selected clients: [0, 14, 34, 39, 54]
+[2024-01-16 03:47:17(+179.97150182724s)] [server.py:466] INFO - 5 Clients Training: Loss 0.198513 Acc 0.9092
+[2024-01-16 03:47:18(+180.65229988098145s)] [server.py:274] INFO - Testing: Loss 2.590555 Acc 0.1503
+[2024-01-16 03:47:18(+180.65306878089905s)] [server.py:130] INFO - ROUND 25
+[2024-01-16 03:47:18(+180.65634489059448s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:18(+180.65654063224792s)] [server.py:193] INFO - Selected clients: [15, 50, 64, 76, 92]
+[2024-01-16 03:47:19(+181.464834690094s)] [server.py:466] INFO - 5 Clients Training: Loss 0.404554 Acc 0.8385
+[2024-01-16 03:47:19(+182.18115735054016s)] [server.py:274] INFO - Testing: Loss 2.728591 Acc 0.1431
+[2024-01-16 03:47:19(+182.1817708015442s)] [server.py:130] INFO - ROUND 26
+[2024-01-16 03:47:19(+182.18484234809875s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:19(+182.184992313385s)] [server.py:193] INFO - Selected clients: [19, 20, 66, 8, 81]
+[2024-01-16 03:47:20(+183.08001160621643s)] [server.py:466] INFO - 5 Clients Training: Loss 0.458011 Acc 0.7915
+[2024-01-16 03:47:21(+183.79286217689514s)] [server.py:274] INFO - Testing: Loss 3.443812 Acc 0.1126
+[2024-01-16 03:47:21(+183.79361176490784s)] [server.py:130] INFO - ROUND 27
+[2024-01-16 03:47:21(+183.7971453666687s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:21(+183.7973508834839s)] [server.py:193] INFO - Selected clients: [0, 27, 30, 48, 82]
+[2024-01-16 03:47:22(+184.92838978767395s)] [server.py:466] INFO - 5 Clients Training: Loss 0.301911 Acc 0.8814
+[2024-01-16 03:47:23(+185.63946676254272s)] [server.py:274] INFO - Testing: Loss 3.126450 Acc 0.1000
+[2024-01-16 03:47:23(+185.6401665210724s)] [server.py:130] INFO - ROUND 28
+[2024-01-16 03:47:23(+185.64345145225525s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:23(+185.6436517238617s)] [server.py:193] INFO - Selected clients: [24, 41, 58, 70, 74]
+[2024-01-16 03:47:24(+186.56105375289917s)] [server.py:466] INFO - 5 Clients Training: Loss 0.143472 Acc 0.9540
+[2024-01-16 03:47:24(+187.24572157859802s)] [server.py:274] INFO - Testing: Loss 2.569108 Acc 0.1023
+[2024-01-16 03:47:24(+187.246417760849s)] [server.py:130] INFO - ROUND 29
+[2024-01-16 03:47:24(+187.24969482421875s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:24(+187.249897480011s)] [server.py:193] INFO - Selected clients: [13, 15, 25, 75, 77]
+[2024-01-16 03:47:25(+188.3481650352478s)] [server.py:466] INFO - 5 Clients Training: Loss 0.300815 Acc 0.8922
+[2024-01-16 03:47:26(+189.034410238266s)] [server.py:274] INFO - Testing: Loss 2.798888 Acc 0.1010
+[2024-01-16 03:47:26(+189.0351288318634s)] [server.py:130] INFO - ROUND 30
+[2024-01-16 03:47:26(+189.03853845596313s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:26(+189.03874111175537s)] [server.py:193] INFO - Selected clients: [17, 68, 85, 89, 91]
+[2024-01-16 03:47:27(+190.06466913223267s)] [server.py:466] INFO - 5 Clients Training: Loss 0.256337 Acc 0.8862
+[2024-01-16 03:47:28(+190.763765335083s)] [server.py:274] INFO - Testing: Loss 2.797270 Acc 0.1365
+[2024-01-16 03:47:28(+190.76441073417664s)] [server.py:130] INFO - ROUND 31
+[2024-01-16 03:47:28(+190.76767086982727s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:28(+190.7678349018097s)] [server.py:193] INFO - Selected clients: [11, 22, 39, 59, 68]
+[2024-01-16 03:47:29(+191.8846833705902s)] [server.py:466] INFO - 5 Clients Training: Loss 0.149805 Acc 0.9410
+[2024-01-16 03:47:30(+192.5933849811554s)] [server.py:274] INFO - Testing: Loss 2.532683 Acc 0.1662
+[2024-01-16 03:47:30(+192.5941641330719s)] [server.py:130] INFO - ROUND 32
+[2024-01-16 03:47:30(+192.5977988243103s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:30(+192.59801506996155s)] [server.py:193] INFO - Selected clients: [4, 72, 83, 84, 97]
+[2024-01-16 03:47:31(+193.4269609451294s)] [server.py:466] INFO - 5 Clients Training: Loss 0.449049 Acc 0.7880
+[2024-01-16 03:47:31(+194.15278935432434s)] [server.py:274] INFO - Testing: Loss 2.554113 Acc 0.1349
+[2024-01-16 03:47:31(+194.15354204177856s)] [server.py:130] INFO - ROUND 33
+[2024-01-16 03:47:31(+194.15718722343445s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:31(+194.15740203857422s)] [server.py:193] INFO - Selected clients: [24, 40, 43, 75, 98]
+[2024-01-16 03:47:32(+195.30604648590088s)] [server.py:466] INFO - 5 Clients Training: Loss 0.070117 Acc 0.9793
+[2024-01-16 03:47:33(+196.01636934280396s)] [server.py:274] INFO - Testing: Loss 3.228512 Acc 0.1290
+[2024-01-16 03:47:33(+196.01710438728333s)] [server.py:130] INFO - ROUND 34
+[2024-01-16 03:47:33(+196.02074360847473s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:33(+196.02095460891724s)] [server.py:193] INFO - Selected clients: [3, 44, 61, 83, 88]
+[2024-01-16 03:47:34(+197.17802906036377s)] [server.py:466] INFO - 5 Clients Training: Loss 0.316964 Acc 0.8694
+[2024-01-16 03:47:35(+197.88770079612732s)] [server.py:274] INFO - Testing: Loss 2.793910 Acc 0.1473
+[2024-01-16 03:47:35(+197.8884470462799s)] [server.py:130] INFO - ROUND 35
+[2024-01-16 03:47:35(+197.89191699028015s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:35(+197.89212584495544s)] [server.py:193] INFO - Selected clients: [19, 28, 53, 66, 81]
+[2024-01-16 03:47:36(+198.84931993484497s)] [server.py:466] INFO - 5 Clients Training: Loss 0.453335 Acc 0.7966
+[2024-01-16 03:47:37(+199.5607295036316s)] [server.py:274] INFO - Testing: Loss 2.586412 Acc 0.1570
+[2024-01-16 03:47:37(+199.56148409843445s)] [server.py:130] INFO - ROUND 36
+[2024-01-16 03:47:37(+199.56495189666748s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:37(+199.5651559829712s)] [server.py:193] INFO - Selected clients: [14, 30, 45, 7, 8]
+[2024-01-16 03:47:37(+200.298814535141s)] [server.py:466] INFO - 5 Clients Training: Loss 0.093109 Acc 0.9703
+[2024-01-16 03:47:38(+200.98617482185364s)] [server.py:274] INFO - Testing: Loss 2.735750 Acc 0.1762
+[2024-01-16 03:47:38(+200.98688173294067s)] [server.py:130] INFO - ROUND 37
+[2024-01-16 03:47:38(+200.99013113975525s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:38(+200.99035048484802s)] [server.py:193] INFO - Selected clients: [43, 70, 74, 92, 94]
+[2024-01-16 03:47:39(+202.03678798675537s)] [server.py:466] INFO - 5 Clients Training: Loss 0.342015 Acc 0.8585
+[2024-01-16 03:47:40(+202.73076105117798s)] [server.py:274] INFO - Testing: Loss 2.752012 Acc 0.1621
+[2024-01-16 03:47:40(+202.73146104812622s)] [server.py:130] INFO - ROUND 38
+[2024-01-16 03:47:40(+202.73472428321838s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:40(+202.73492121696472s)] [server.py:193] INFO - Selected clients: [11, 2, 31, 33, 76]
+[2024-01-16 03:47:41(+203.6490216255188s)] [server.py:466] INFO - 5 Clients Training: Loss 0.155358 Acc 0.9636
+[2024-01-16 03:47:41(+204.35709953308105s)] [server.py:274] INFO - Testing: Loss 2.794021 Acc 0.1416
+[2024-01-16 03:47:41(+204.35780477523804s)] [server.py:130] INFO - ROUND 39
+[2024-01-16 03:47:41(+204.36115217208862s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:41(+204.36135005950928s)] [server.py:193] INFO - Selected clients: [11, 37, 5, 90, 93]
+[2024-01-16 03:47:42(+205.17567801475525s)] [server.py:466] INFO - 5 Clients Training: Loss 0.236822 Acc 0.9229
+[2024-01-16 03:47:43(+205.92743682861328s)] [server.py:274] INFO - Testing: Loss 2.675678 Acc 0.1917
+[2024-01-16 03:47:43(+205.92805528640747s)] [server.py:130] INFO - ROUND 40
+[2024-01-16 03:47:43(+205.93112897872925s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:43(+205.93127536773682s)] [server.py:193] INFO - Selected clients: [13, 15, 16, 25, 77]
+[2024-01-16 03:47:44(+206.7707064151764s)] [server.py:466] INFO - 5 Clients Training: Loss 0.325766 Acc 0.8848
+[2024-01-16 03:47:45(+207.45666456222534s)] [server.py:274] INFO - Testing: Loss 3.208825 Acc 0.1291
+[2024-01-16 03:47:45(+207.45738863945007s)] [server.py:130] INFO - ROUND 41
+[2024-01-16 03:47:45(+207.46078181266785s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:45(+207.46097612380981s)] [server.py:193] INFO - Selected clients: [35, 38, 61, 85, 91]
+[2024-01-16 03:47:46(+208.57250714302063s)] [server.py:466] INFO - 5 Clients Training: Loss 0.231088 Acc 0.9244
+[2024-01-16 03:47:46(+209.27912950515747s)] [server.py:274] INFO - Testing: Loss 2.787470 Acc 0.1503
+[2024-01-16 03:47:46(+209.27984881401062s)] [server.py:130] INFO - ROUND 42
+[2024-01-16 03:47:46(+209.28327226638794s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:46(+209.28346800804138s)] [server.py:193] INFO - Selected clients: [16, 18, 41, 56, 77]
+[2024-01-16 03:47:47(+210.1944613456726s)] [server.py:466] INFO - 5 Clients Training: Loss 0.337310 Acc 0.8515
+[2024-01-16 03:47:48(+210.9134874343872s)] [server.py:274] INFO - Testing: Loss 2.996225 Acc 0.1149
+[2024-01-16 03:47:48(+210.9141879081726s)] [server.py:130] INFO - ROUND 43
+[2024-01-16 03:47:48(+210.91760778427124s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:48(+210.91780757904053s)] [server.py:193] INFO - Selected clients: [0, 29, 39, 51, 88]
+[2024-01-16 03:47:49(+211.94211602210999s)] [server.py:466] INFO - 5 Clients Training: Loss 0.200866 Acc 0.9135
+[2024-01-16 03:47:50(+212.65608167648315s)] [server.py:274] INFO - Testing: Loss 2.566015 Acc 0.1713
+[2024-01-16 03:47:50(+212.65678906440735s)] [server.py:130] INFO - ROUND 44
+[2024-01-16 03:47:50(+212.66022515296936s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:50(+212.6604299545288s)] [server.py:193] INFO - Selected clients: [32, 4, 50, 84, 97]
+[2024-01-16 03:47:51(+213.69451379776s)] [server.py:466] INFO - 5 Clients Training: Loss 0.542690 Acc 0.7520
+[2024-01-16 03:47:52(+214.4069938659668s)] [server.py:274] INFO - Testing: Loss 3.184217 Acc 0.1104
+[2024-01-16 03:47:52(+214.40766620635986s)] [server.py:130] INFO - ROUND 45
+[2024-01-16 03:47:52(+214.41104555130005s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:52(+214.41121625900269s)] [server.py:193] INFO - Selected clients: [23, 54, 64, 78, 98]
+[2024-01-16 03:47:52(+215.36337065696716s)] [server.py:466] INFO - 5 Clients Training: Loss 0.067551 Acc 0.9865
+[2024-01-16 03:47:53(+216.09491062164307s)] [server.py:274] INFO - Testing: Loss 2.425331 Acc 0.1465
+[2024-01-16 03:47:53(+216.09559559822083s)] [server.py:130] INFO - ROUND 46
+[2024-01-16 03:47:53(+216.09896397590637s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:53(+216.09913277626038s)] [server.py:193] INFO - Selected clients: [44, 53, 59, 71, 81]
+[2024-01-16 03:47:55(+217.7148153781891s)] [server.py:466] INFO - 5 Clients Training: Loss 0.201453 Acc 0.9243
+[2024-01-16 03:47:56(+218.42747378349304s)] [server.py:274] INFO - Testing: Loss 2.734894 Acc 0.1607
+[2024-01-16 03:47:56(+218.4281497001648s)] [server.py:130] INFO - ROUND 47
+[2024-01-16 03:47:56(+218.43155145645142s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:56(+218.43171334266663s)] [server.py:193] INFO - Selected clients: [17, 19, 2, 33, 57]
+[2024-01-16 03:47:56(+219.3708734512329s)] [server.py:466] INFO - 5 Clients Training: Loss 0.341517 Acc 0.8482
+[2024-01-16 03:47:57(+220.08403396606445s)] [server.py:274] INFO - Testing: Loss 2.578732 Acc 0.1439
+[2024-01-16 03:47:57(+220.0847532749176s)] [server.py:130] INFO - ROUND 48
+[2024-01-16 03:47:57(+220.08816719055176s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:57(+220.0883514881134s)] [server.py:193] INFO - Selected clients: [30, 51, 68, 88, 9]
+[2024-01-16 03:47:58(+221.0682876110077s)] [server.py:466] INFO - 5 Clients Training: Loss 0.438697 Acc 0.8086
+[2024-01-16 03:47:59(+221.76552510261536s)] [server.py:274] INFO - Testing: Loss 2.463694 Acc 0.2020
+[2024-01-16 03:47:59(+221.76613545417786s)] [server.py:130] INFO - ROUND 49
+[2024-01-16 03:47:59(+221.76915907859802s)] [server.py:188] INFO - Pre-client selection 100 -> 5
+[2024-01-16 03:47:59(+221.76931238174438s)] [server.py:193] INFO - Selected clients: [36, 63, 7, 90, 95]
+[2024-01-16 03:48:00(+222.6377875804901s)] [server.py:466] INFO - 5 Clients Training: Loss 0.162632 Acc 0.9493
+[2024-01-16 03:48:16(+238.7004222869873s)] [server.py:274] INFO - Testing: Loss 2.798757 Acc 0.1700

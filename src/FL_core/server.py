@@ -272,11 +272,7 @@ class Server(object):
             ##################################################################
             #                        Record log info 
             ##################################################################  
-            if self.args.method == "FedCorr":
-                logger.info('[{}] {}ing: Loss {:.6f} Acc {:.4f}'.format(
-                    self.selection_method.stage_name, phase, result["loss"], result["acc"]))
-            else:
-                logger.info('{}ing: Loss {:.6f} Acc {:.4f}'.format(phase, result["loss"], result["acc"]))
+            logger.info('[ROUND {}] {}ing: Loss {:.6f} Acc {:.4f}'.format(round_idx, phase, result["loss"], result["acc"]))
 
             if self.args.wandb:
                 wandb.log(self.record)

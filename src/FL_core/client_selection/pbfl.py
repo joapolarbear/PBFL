@@ -33,6 +33,27 @@ class Proj_Bandit(ClientSelection):
         self.warmup_frac = 1 / self.warmup_bound
         self.prob = [1 / self.total] * self.total
         
+        # Decide the UCB exploration parameter control algorithm
+        if args.ucb_alpha is None:
+            self.ucb_alpha_fn = lambda step: 0
+        elif args.ucb_alpha.startswith("const_"):
+            _const = eval(args.ucb_alpha.split("const_")[1].replace("bslash", "/"))
+            self.ucb_alpha_fn = lambda step: _const
+        elif args.ucb_alpha.startswith("linear_"):
+            _linear = eval(args.ucb_alpha.split("linear_")[1].replace("bslash", "/"))
+            self.ucb_alpha_fn = lambda step: step * _linear
+        elif args.ucb_alpha.startswith("round_"):
+            # We use this method by default
+            def _ucb_alpha_fn(step):
+                if step < 100:
+                    alpha = step / 100
+                else:
+                    alpha = 200 / (step + 100)
+                return alpha
+            self.ucb_alpha_fn = _ucb_alpha_fn
+        else:
+            raise ValueError(f"Invalid UCB alpha: {args.ucb_alpha}")
+        
         # signal.signal(signal.SIGINT, self.signal_handler)
         # signal.signal(signal.SIGTERM, self.signal_handler)
         atexit.register(self.signal_handler)
@@ -87,18 +108,18 @@ class Proj_Bandit(ClientSelection):
         for client_idx in range(len(self.client2proj)):
             self.client2proj[client_idx] = np.mean(self.client2rewards[client_idx])
     
-    def get_ucb(self, a):
-        momemtum_based_grad_proj = self.client2proj
+    def get_ucb(self, step):
+        # momemtum_based_grad_proj = self.client2proj
         # print("Proj", momemtum_based_grad_proj)
         assert isinstance(self.client2proj, list) or isinstance(self.client2proj, np.ndarray)
         # assert len(self.client2proj) == num_of_client
-        if a<100:
-            alpha = a/100
-        else:
-            alpha = 200/(a+100)
         
-        ucb = self.client2proj + alpha * np.sqrt(
-            (2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
+        alpha = self.ucb_alpha_fn(step)
+        if alpha == 0:
+            ucb = self.client2proj
+        else:
+            ucb = self.client2proj + alpha * np.sqrt(
+                (2 * np.log(self.client_update_cnt))/self.client2selected_cnt)
         
         # print("ucb", ucb)
         return ucb
@@ -136,10 +157,12 @@ class Proj_Bandit(ClientSelection):
             metric: local_gradients
         '''
         if self.client_update_cnt < self.warmup_bound:
-            MAX_SELECTED_NUM = math.ceil(self.total * self.warmup_frac)
+            MAX_SELECTED_NUM = min(math.ceil(self.total * self.warmup_frac), len(np.where(np.array(self.prob) > 0)[0]))
             logger.info(f"> PBFL warmup {self.client_update_cnt}")
-            selected_client_index = np.random.choice(
-                self.total, MAX_SELECTED_NUM, p=self.prob, replace=False)
+            try:
+                selected_client_index = np.random.choice(self.total, MAX_SELECTED_NUM, p=self.prob, replace=False)
+            except:
+                import pdb; pdb.set_trace()
             for client_id in selected_client_index:
                 self.prob[client_id] = 0
             if sum(self.prob) > 0:
@@ -151,7 +174,7 @@ class Proj_Bandit(ClientSelection):
             # selected_client_index = np.arange(self.total)
             # selected_client_index = np.random.choice(self.total, n, replace=False)
         else:
-            ucb = self.get_ucb(a=self.client_update_cnt)
+            ucb = self.get_ucb(step=self.client_update_cnt)
             sorted_client_idxs = ucb.argsort()[::-1]
             ### Select clients
             selected_client_index = sorted_client_idxs[:n]

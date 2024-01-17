@@ -52,7 +52,7 @@ def _load_data(_dir):
 
 def _register_data(_user_data: dict, _data_local_dict: dict, _data_local_num_dict: dict,
                                client_idx: int, client_name: str, new_idx: int, min_num_samples: int, is_train: bool):
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     data_x = np.expand_dims(_user_data[client_name]['x'], axis=1)
     data_y = _user_data[client_name]['y']
 

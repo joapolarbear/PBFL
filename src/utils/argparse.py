@@ -124,7 +124,14 @@ def get_args():
     parser.add_argument('--save_probs', action='store_true', default=False, help='save probs')
     parser.add_argument('--no_save_results', action='store_true', default=False, help='save results')
     parser.add_argument('--test_freq', type=int, default=1, help='test all frequency')
+    
+    # UCB exploration parameter
+    parser.add_argument('--ucb_alpha', type=str, default='round_', help='UCB exploration parameter alpha, with the following types'
+                        '1): --ucb_alpha=const_a, alpha = a'
+                        '2): --ucb_alpha=linear_a, alpha = a * step'
+                        '3): --ucb_alpha=round_, alpha= step / 100 if step < 100 else 200 / (step + 100)')
 
+    # Others
     parser.add_argument('--comment', type=str, default='', help='comment')
     args = parser.parse_args()
     return args
