@@ -1,5 +1,4 @@
-﻿# Active Client Selection for Communication-efficient Federated Learning
-Active Client Selection algorithms of Federated Learning implementations by PyTorch in my Thesis.
+
 
 ## Requirements
 ```shell
