@@ -6,7 +6,6 @@ import os
 
 def save_files(args):
     args.machine = platform.uname().node
-    args.start = time.strftime('%Y%m%d-%H%M%S', time.localtime())
     #args.save_path = f'./results/{args.dataset}/{args.method}-{args.fed_algo}-{args.num_clients_per_round}-{args.total_num_clients}/{args.start}'
     alpha = f'_a{args.alpha2}' if 'MaxEntropySampling' in args.method else ''
     dirichlet_alpha = f'_Da{args.dirichlet_alpha}' if args.dataset == 'PartitionedCIFAR10' else ''

@@ -65,20 +65,26 @@ def client_selection_method(args):
 
 
 if __name__ == '__main__':
-    if args.comment != '': args.comment = '-'+args.comment
-    #if args.labeled_ratio < 1: args.comment = f'-L{args.labeled_ratio}{args.comment}'
-    if args.fed_algo != 'FedAvg': args.comment = f'-{args.fed_algo}{args.comment}'
+    args.start = time.strftime('%Y%m%d-%H%M%S', time.localtime())
+    if args.comment:
+        args.comment = f"-{args.comment}"
+    #if args.labeled_ratio < 1:
+    #    args.comment = f"-L{args.labeled_ratio}{args.comment}"
+    if args.fed_algo != 'FedAvg':
+        args.comment = f"-{args.fed_algo}{args.comment}"
     
     # save to wandb
     args.wandb = AVAILABLE_WANDB
+    exp_name = os.getenv('PBFL_EXP_NAME')
+    assert exp_name is not None
     if args.wandb:
         wandb.init(
-            project=f'AFL-{args.dataset}-{args.num_clients_per_round}-{args.num_available}-{args.total_num_clients}',
-            name=f"{args.method}{args.comment}",
+            project=f'PBFL',
+            name=f"{args.start}-{exp_name}",
             config=args,
             dir='../',
             save_code=True,
-            mode='offline'
+            mode='online'
         )
         # wandb.run.log_code(".", include_fn=lambda x: 'src/' in x or 'main.py' in x)
 
