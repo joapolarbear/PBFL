@@ -34,6 +34,7 @@ def load_data(args):
                 dataset = pickle.load(fp)[0]
             logger.info(f"Load cached dataset from {cache_path}")
             return dataset
+        print(f"Download data to {cache_path} ... ")
 
         ### No cached data found
         train_dataset, test_dataset, user_groups, user_groups_test, \

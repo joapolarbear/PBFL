@@ -75,11 +75,11 @@ if __name__ == '__main__':
     
     # save to wandb
     args.wandb = AVAILABLE_WANDB
-    exp_name = os.getenv('PBFL_EXP_NAME')
+    exp_name = os.getenv('EXP_NAME_SHORT')
     assert exp_name is not None
     if args.wandb:
         wandb.init(
-            project=f'PBFL',
+            project=f'PBFL-{args.dataset}',
             name=f"{args.start}-{exp_name}",
             config=args,
             dir='../',

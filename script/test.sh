@@ -24,13 +24,13 @@ DATASETS=(cifar)
 
 # Distribution types
 # DIST_TYPES=(one_shard two_shard dir)
-DIST_TYPES=(dir)
+DIST_TYPES=(one_shard two_shard dir)
 
 # METHODS=(Random)
 # METHODS=(PBFL Random)
 # METHODS=(FedCor)
-# METHODS=(Pow-d)
-METHODS=(Random PBFL FedCor Pow-d DivFL)
+METHODS=(Pow-d)
+# METHODS=(Random PBFL FedCor Pow-d DivFL)
 # METHODS=(Random PBFL FedCor Pow-d)
 
 #################################################
@@ -71,7 +71,8 @@ for method in ${METHODS[@]}; do
         exit
     fi
 
-    export PBFL_EXP_NAME="${PBFL_EXP_DIR}/${method}_policy-${dist_type}-${TOTAL_CLIENT_NUM}to${NUM_CLIENT_PER_ROUND}-${dataset}-${model}"
+    export EXP_NAME_SHORT="${method}_policy-${dist_type}-${TOTAL_CLIENT_NUM}to${NUM_CLIENT_PER_ROUND}-${dataset}-${model}"
+    export PBFL_EXP_NAME="${PBFL_EXP_DIR}/$EXP_NAME_SHORT"
     # echo $FedCorArg
     python3 src/main.py \
         --dataset ${dataset} \

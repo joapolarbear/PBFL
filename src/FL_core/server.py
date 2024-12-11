@@ -167,9 +167,9 @@ class Server(object):
                 client_indices = self.selection_method.select_candidates(client_indices, self.args.num_candidates)
                 THRESHOLD = 10
                 if len(client_indices) <= THRESHOLD:
-                    logger.info(f'Selected clients: [{", ".join(client_indices)}]')
+                    logger.info(f'Selected clients: [{", ".join([str(i) for i in client_indices])}]')
                 else:
-                    logger.info(f'Selected clients: [{", ".join(client_indices[:THRESHOLD])} ... ]')
+                    logger.info(f'Selected clients: [{", ".join([str(i) for i in client_indices[:THRESHOLD]])} ... ]')
 
             ##################################################################
             #                        PRE-CLIENT SELECTION
