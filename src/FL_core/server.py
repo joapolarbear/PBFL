@@ -15,6 +15,13 @@ from utils import logger
 
 from torch.utils.data import TensorDataset
 
+def print_selected_client(client_indices, THRESHOLD = 100):
+    rst = sorted([str(i) for i in client_indices])
+    if len(rst) <= THRESHOLD:
+        logger.info(f'Selected clients: [{", ".join(rst)}]')
+    else:
+        logger.info(f'Selected clients: [{", ".join(rst[:THRESHOLD])} ... ]')
+
 class Server(object):
     def __init__(self, data, init_model, args, selection, fed_algo, files):
         """
@@ -151,7 +158,7 @@ class Server(object):
             ##################################################################
             # initialize selection methods by setting given global model
             if self.args.method in NEED_INIT_METHOD:
-                if self.args.method in ["PBFL", "DivFL", "FedCorr"]:
+                if self.args.method in ["PBFL", "DivFL", "FedCorr", "Cosin"]:
                     self.selection_method.init(self.global_model)
                 else:
                     raise NotImplementedError("We do not maintain a cost model for each client, "
@@ -165,11 +172,7 @@ class Server(object):
                 # np.random.seed((self.args.seed+1)*10000000 + round_idx)
                 logger.info(f'Candidate client selection {self.args.num_candidates}/{len(client_indices)}')
                 client_indices = self.selection_method.select_candidates(client_indices, self.args.num_candidates)
-                THRESHOLD = 10
-                if len(client_indices) <= THRESHOLD:
-                    logger.info(f'Selected clients: [{", ".join([str(i) for i in client_indices])}]')
-                else:
-                    logger.info(f'Selected clients: [{", ".join([str(i) for i in client_indices[:THRESHOLD]])} ... ]')
+                print_selected_client(client_indices)
 
             ##################################################################
             #                        PRE-CLIENT SELECTION
@@ -178,7 +181,7 @@ class Server(object):
             if self.args.method in PRE_SELECTION_METHOD:
                 # np.random.seed((self.args.seed+1)*10000 + round_idx)
                 
-                if self.args.method == "PBFL":
+                if self.args.method in ["PBFL", 'Cosin']:
                     kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
                     num_before = len(client_indices)
                     client_indices = self.selection_method.select(**kwargs, metric=None)
@@ -191,13 +194,7 @@ class Server(object):
                     num_before = len(client_indices)
                     client_indices = self.selection_method.select(self.num_clients_per_round, client_indices, None)
                     logger.info(f'Pre-client selection {num_before} -> {len(client_indices)}')
-                
-                rst = sorted([str(i) for i in client_indices])
-                THRESHOLD = 10
-                if len(rst) <= THRESHOLD:
-                    logger.info(f'Selected clients: [{", ".join(rst)}]')
-                else:
-                    logger.info(f'Selected clients: [{", ".join(rst[:THRESHOLD])} ... ]')
+                print_selected_client(client_indices)
 
             ##################################################################
             #                        CLIENT UPDATE (TRAINING)
@@ -226,6 +223,7 @@ class Server(object):
                         self.client_list[idx].update_ema_variables(round_idx)
                 # update local metrics
                 client_indices = np.take(client_indices, selected_client_indices).tolist()
+                print_selected_client(client_indices)
                 local_losses = np.take(local_losses, selected_client_indices)
                 accuracy = np.take(accuracy, selected_client_indices)
 
@@ -234,7 +232,7 @@ class Server(object):
             self.save_current_updates(local_losses, accuracy, len(client_indices), phase='Train', round=round_idx)
             self.save_selected_clients(round_idx, client_indices)
             # DEBUGGING
-            if self.args.method not in ["PBFL", "FedCorr"]:
+            if self.args.method not in ["PBFL", "FedCorr", "Cosin"]:
                 assert len(client_indices) == self.num_clients_per_round, \
                     (len(client_indices), self.num_clients_per_round)
                     
@@ -260,7 +258,7 @@ class Server(object):
             # test on test dataset
             result = self.global_test()
             local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
-            if self.args.method == "PBFL":
+            if self.args.method in ["PBFL", 'Cosin']:
                 self.selection_method.global_loss = result["loss"]
                 self.selection_method.global_accu = result["acc"]
                 self.selection_method.post_update(client_indices, local_models, self.global_model)

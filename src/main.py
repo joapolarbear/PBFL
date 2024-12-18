@@ -59,6 +59,8 @@ def client_selection_method(args):
     elif args.method == "Single":
         args.total_num_client = args.num_clients_per_round = 1
         return SingleSelection(**kwargs)
+    elif args.method == "Cosin":
+        return CosineSimilaritySelector(args, **kwargs)
     else:
         raise('CHECK THE NAME OF YOUR SELECTION METHOD')
 

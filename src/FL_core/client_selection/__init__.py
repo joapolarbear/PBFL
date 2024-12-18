@@ -6,3 +6,4 @@ from .grad import *
 from .divfl import *
 from .fedcor import *
 from .pbfl import *
+from .cos_similarity import *

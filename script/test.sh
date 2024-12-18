@@ -10,7 +10,7 @@ DATADIR=./data
 #              Hyper-parameters
 #################################################
 BATCH_SIZE=50
-TRAIN_ROUND=500
+TRAIN_ROUND=2000
 TOTAL_CLIENT_NUM=100
 LOCAL_EP=5
 
@@ -19,19 +19,20 @@ LOCAL_EP=5
 #################################################
 # DATASETS=(FederatedEMNIST)
 # DATASETS=(PartitionedCIFAR10)
+# DATASETS=(cifar)
 DATASETS=(cifar)
-# DATASETS=(fmnist)
 
 # Distribution types
 # DIST_TYPES=(one_shard two_shard dir)
-DIST_TYPES=(one_shard two_shard dir)
+DIST_TYPES=(dir)
 
 # METHODS=(Random)
 # METHODS=(PBFL Random)
 # METHODS=(FedCor)
-METHODS=(Pow-d)
+# METHODS=(Pow-d)
+# METHODS=(DivFL)
 # METHODS=(Random PBFL FedCor Pow-d DivFL)
-# METHODS=(Random PBFL FedCor Pow-d)
+METHODS=(PBFL DivFL)
 
 #################################################
 #              Run
