@@ -52,7 +52,7 @@ def client_selection_method(args):
         return DivFL(**kwargs, subset_ratio=args.subset_ratio)
     elif args.method == 'GradNorm':
         return GradNorm(**kwargs)
-    elif args.method == 'PBFL':
+    elif args.method == 'GPFL':
         return Proj_Bandit(args, **kwargs)
     elif args.method == "FedCor":
         return FedCor(args, **kwargs)

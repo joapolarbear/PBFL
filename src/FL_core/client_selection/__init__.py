@@ -5,5 +5,5 @@ from .client_selection import *
 from .grad import *
 from .divfl import *
 from .fedcor import *
-from .pbfl import *
+from .gpfl import *
 from .cos_similarity import *

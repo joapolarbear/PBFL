@@ -5,3 +5,4 @@ wandb/
 .log
 /data
 *.pkl
+*DS_Store

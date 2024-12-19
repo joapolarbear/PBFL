@@ -10,7 +10,7 @@ import atexit
 
 from utils import logger
 
-from .pbfl import Proj_Bandit
+from .gpfl import Proj_Bandit
 
 class CosineSimilaritySelector(Proj_Bandit):  
     def update_proj_list(self, selected_client_idxs, global_m, local_models, improved):

@@ -27,12 +27,12 @@ DATASETS=(cifar)
 DIST_TYPES=(dir)
 
 # METHODS=(Random)
-# METHODS=(PBFL Random)
+# METHODS=(GPFL Random)
 # METHODS=(FedCor)
 # METHODS=(Pow-d)
 # METHODS=(DivFL)
-# METHODS=(Random PBFL FedCor Pow-d DivFL)
-METHODS=(PBFL DivFL)
+# METHODS=(Random GPFL FedCor Pow-d DivFL)
+METHODS=(Random FedCor Pow-d)
 
 #################################################
 #              Run
@@ -102,9 +102,9 @@ done
 #################################################
 #              Backup
 #################################################
-# python3 src/main.py --dataset FederatedEMNIST --method PBFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 200 -d 10
-# src/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.001 -B 50 -R 1000 --method PBFL --comment ucb0to4/5
-# src/main.py --dataset FederatedEMNIST_nonIID --method PBFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 500
+# python3 src/main.py --dataset FederatedEMNIST --method GPFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 200 -d 10
+# src/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.001 -B 50 -R 1000 --method GPFL --comment ucb0to4/5
+# src/main.py --dataset FederatedEMNIST_nonIID --method GPFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 500
 # FedCor
 # python3 3rdparty/FedCor/main.py \
 #     --gpu=0 --gpr_gpu=0 \

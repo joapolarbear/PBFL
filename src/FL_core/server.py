@@ -158,7 +158,7 @@ class Server(object):
             ##################################################################
             # initialize selection methods by setting given global model
             if self.args.method in NEED_INIT_METHOD:
-                if self.args.method in ["PBFL", "DivFL", "FedCorr", "Cosin"]:
+                if self.args.method in ["GPFL", "DivFL", "FedCorr", "Cosin"]:
                     self.selection_method.init(self.global_model)
                 else:
                     raise NotImplementedError("We do not maintain a cost model for each client, "
@@ -181,7 +181,7 @@ class Server(object):
             if self.args.method in PRE_SELECTION_METHOD:
                 # np.random.seed((self.args.seed+1)*10000 + round_idx)
                 
-                if self.args.method in ["PBFL", 'Cosin']:
+                if self.args.method in ["GPFL", 'Cosin']:
                     kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
                     num_before = len(client_indices)
                     client_indices = self.selection_method.select(**kwargs, metric=None)
@@ -232,7 +232,7 @@ class Server(object):
             self.save_current_updates(local_losses, accuracy, len(client_indices), phase='Train', round=round_idx)
             self.save_selected_clients(round_idx, client_indices)
             # DEBUGGING
-            if self.args.method not in ["PBFL", "FedCorr", "Cosin"]:
+            if self.args.method not in ["GPFL", "FedCorr", "Cosin"]:
                 assert len(client_indices) == self.num_clients_per_round, \
                     (len(client_indices), self.num_clients_per_round)
                     
@@ -258,7 +258,7 @@ class Server(object):
             # test on test dataset
             result = self.global_test()
             local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
-            if self.args.method in ["PBFL", 'Cosin']:
+            if self.args.method in ["GPFL", 'Cosin']:
                 self.selection_method.global_loss = result["loss"]
                 self.selection_method.global_accu = result["acc"]
                 self.selection_method.post_update(client_indices, local_models, self.global_model)

@@ -2,7 +2,7 @@ import argparse
 
 ALL_METHODS = [
     'Random', 'Cluster1', 'Cluster2', 'Pow-d', 'AFL', 'DivFL', 'GradNorm',
-    'PBFL', "FedCorr", "Single", "FedCor", "Cosin"
+    'GPFL', "FedCorr", "Single", "FedCor", "Cosin"
 ]
 
 
