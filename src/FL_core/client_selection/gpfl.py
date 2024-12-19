@@ -130,7 +130,7 @@ class Proj_Bandit(ClientSelection):
         
         if self.client_update_cnt < self.warmup_bound:
             MAX_SELECTED_NUM = math.ceil(self.total * self.warmup_frac)
-            logger.info(f"> PBFL warmup {self.client_update_cnt}")
+            logger.info(f"> GPFL warmup {self.client_update_cnt}")
             selected_client_index = np.random.choice(
                 self.total, MAX_SELECTED_NUM, replace=False)
             # st = self.client_update_cnt * MAX_SELECTED_NUM

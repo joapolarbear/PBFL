@@ -16,7 +16,7 @@ import random
 
 import utils
 
-utils.init(".", "pbfl")
+utils.init(".", "gpfl")
 
 from data import load_data
 from model import create_model
@@ -55,7 +55,7 @@ def client_selection_method(args):
         return DivFL(**kwargs, subset_ratio=args.subset_ratio)
     elif args.method == 'GradNorm':
         return GradNorm(**kwargs)
-    elif args.method == 'PBFL':
+    elif args.method == 'GPFL':
         return Proj_Bandit(**kwargs)
     elif args.method == "FedCorr":
         return FedCorr(args, **kwargs)

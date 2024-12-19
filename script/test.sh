@@ -1,9 +1,9 @@
 #!/bin/bash
 
 
-# python3 src/main.py --dataset FederatedEMNIST --method PBFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 200 -d 10
-# src/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.001 -B 50 -R 1000 --method PBFL --comment ucb0to4/5
-# src/main.py --dataset FederatedEMNIST_nonIID --method PBFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 500
+# python3 src/main.py --dataset FederatedEMNIST --method GPFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 200 -d 10
+# src/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.001 -B 50 -R 1000 --method GPFL --comment ucb0to4/5
+# src/main.py --dataset FederatedEMNIST_nonIID --method GPFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 500
 MODEL=CNN
 # MODEL=RESNET18
 BATCH_SIZE=50
@@ -20,10 +20,10 @@ DATASET=cifar
 
 DATADIR=./data
 # METHODS=(Random)
-METHODS=(PBFL)
+# METHODS=(GPFL)
 # METHODS=(FedCorr)
 # METHODS=(Pow-d)
-# METHODS=(Random PBFL FedCorr Pow-d)
+METHODS=(Random GPFL FedCorr Pow-d)
 
 for METHOD in ${METHODS[@]}; do
     python3 src/main.py \

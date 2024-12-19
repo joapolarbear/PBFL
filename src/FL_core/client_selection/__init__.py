@@ -5,4 +5,4 @@ from .client_selection import *
 from .grad import *
 from .divfl import *
 from .fedcorr import *
-from .pbfl import *
+from .gpfl import *

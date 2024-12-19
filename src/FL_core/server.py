@@ -97,7 +97,6 @@ class Server(object):
         self.global_test_data = TensorDataset(X[perm], Y[perm])
         logger.info(f"Global test data size: {len(Y)}")
    
-
     def _init_clients(self, init_model):
         """
         initialize clients' model
@@ -146,7 +145,7 @@ class Server(object):
             # set client selection methods
             # initialize selection methods by setting given global model
             if self.args.method in NEED_INIT_METHOD:
-                if self.args.method in ["PBFL", "DivFL", "FedCorr"]:
+                if self.args.method in ["GPFL", "DivFL", "FedCorr"]:
                     self.selection_method.init(self.global_model)
                 else:
                     raise NotImplementedError("We do not maintain a cost model for each client, "
@@ -166,7 +165,7 @@ class Server(object):
             if self.args.method in PRE_SELECTION_METHOD:
                 # np.random.seed((self.args.seed+1)*10000 + round_idx)
                 
-                if self.args.method == "PBFL":
+                if self.args.method == "GPFL":
                     kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
                     # self.global_model.eval()
                     # local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
@@ -190,7 +189,7 @@ class Server(object):
                     logger.info(f'Selected clients: [{", ".join(rst[:THRESHOLD])} ... ]')
 
             ## CLIENT UPDATE (TRAINING)
-            engated_client_indices = deepcopy(client_indices)
+            engaged_client_indices = deepcopy(client_indices)
             
             ### TODO huhanpeng: add a L2(M_local-M_global) to the loss function
             local_losses, accuracy, local_metrics = self.train_clients(client_indices)
@@ -223,7 +222,7 @@ class Server(object):
 
             ## SERVER AGGREGATION
             # DEBUGGING
-            if self.args.method not in ["PBFL", "FedCorr"]:
+            if self.args.method not in ["GPFL", "FedCorr"]:
                 assert len(client_indices) == self.num_clients_per_round, \
                     (len(client_indices), self.num_clients_per_round)
                         
@@ -240,7 +239,7 @@ class Server(object):
             if self.args.method == "FedCorr":
                 if self.selection_method.stage == 1:
                     ### warmup phase
-                    for client_id in engated_client_indices:
+                    for client_id in engaged_client_indices:
                         client = self.client_list[client_id]
                         output_array, loss_array = client.elementwise_test(self.global_model, test_on_training_data=True)
                         self.selection_method.warmup_sub_iter_summary(client_id, output_array, loss_array)
@@ -274,7 +273,7 @@ class Server(object):
                 self.test_on_training_data = False
             # test on test dataset
             result = self.global_test()
-            if self.args.method == "PBFL":
+            if self.args.method == "GPFL":
                 self.selection_method.global_loss = result["loss"]
                 self.selection_method.global_accu = result["acc"]
                 self.selection_method.post_update(client_indices, local_models, self.global_model)
@@ -295,7 +294,7 @@ class Server(object):
 
             ## Clear garbages
             del local_models, local_losses, accuracy
-            for client_idx in engated_client_indices:
+            for client_idx in engaged_client_indices:
                 self.client_list[client_idx].trainer.clear_model()
 
         for k in self.files:
@@ -417,6 +416,7 @@ class Server(object):
                 # progressBar(len(metrics['acc']), num_clients_for_test, result, phase='Test')
 
         self.save_current_updates(metrics['loss'], metrics['acc'], num_clients_for_test, phase=phase)
+        return metrics
 
 
     def save_current_updates(self, losses, accs, num_clients, phase='Train', round=None):
