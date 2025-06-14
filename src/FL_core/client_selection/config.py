@@ -9,7 +9,7 @@ class SelectMethod:
     pow_d = "Pow-d"
     divfl = "DivFL"
     cosin = "Cosin"
-    hisc = "HiSC"
+    hisc = "HiCS"
     single = "Single"
     afl = "AFL"
     

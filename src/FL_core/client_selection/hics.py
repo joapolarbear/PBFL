@@ -168,14 +168,28 @@ class HiCSSelector(ClientSelection):
         
         self.args = args
         
+        # Refer to the paper and https://github.com/CityChan/HiCS-FL/blob/master/configs/FMNIST/ablation/FMNIST_hics_1_lambda10_gamma4_M5.json
+        # Refert to 
+        if args.dataset == "cifar":
+            self._temp = 0.015
+        elif args.dataset == "fmnist":
+            self._temp = 0.0025
+        else:
+            raise ValueError
+        self.hics_alphas = [0.001, 0.002, 0.005, 0.01, 0.5]
+        self._lambda = 10
+        self._gamma = 4
+        self.M = 5
+        
         alphas = set()
-        for alpha in self.args.hics_alphas:
+        for alpha in self.hics_alphas:
             alphas.add(alpha)
         if len(alphas) > 1:
             self.multialpha = True
         else:
             self.multialpha = False
 
+        self.num_round = self.args.num_round
         self.round: int = None
         self.warmup: int = None
         
@@ -239,9 +253,9 @@ class HiCSSelector(ClientSelection):
                 
         self.magnitudes = self._magnitude_gradient(self.gradients)
     
-    def _cluster_sampling(self, gradients,magnitudes,sim_type,epoch):
+    def _cluster_sampling(self, gradients, magnitudes, sim_type, round):
         Clusters = []
-        n_sampled = max(int(self.args["frac"] * self.args["n_clients"]), 1)
+        n_sampled = max(self.selected_client_num, 1)
         
         magnitudes = self._magnitude_gradient(gradients)
         estimated_H = self._estimated_entropy_from_grad(magnitudes)
@@ -249,25 +263,33 @@ class HiCSSelector(ClientSelection):
         linkage_matrix = linkage(sim_matrix, "ward") 
 
         if np.array(estimated_H).var() < 0.1: 
-            hc = AgglomerativeClustering(n_clusters = self.args["M"], metric = "euclidean", linkage = 'ward') 
+            hc = AgglomerativeClustering(
+                n_clusters=self.M, metric="euclidean", linkage = 'ward'
+            ) 
          
             hc.fit_predict(sim_matrix)
             labels = hc.labels_
-            for i in range(self.args["M"]):
+            for i in range(self.M):
                 cluster_i = np.where(labels == i)[0]
                 Clusters.append(cluster_i)    
-            avg_entropy = self._estimated_entropy(estimated_H,Clusters)
-            return self._sample_clients_entropy(avg_entropy, Clusters,self.n_samples,epoch)
+            avg_entropy = self._estimated_entropy(
+                estimated_H,Clusters
+            )
+            return self._sample_clients_entropy(
+                avg_entropy, Clusters, self.n_samples, round
+            )
 
         else:
-            distri_clusters = get_clusters_with_alg2(linkage_matrix, n_sampled, self.weights)
+            distri_clusters = get_clusters_with_alg2(
+                linkage_matrix, n_sampled, self.weights
+            )
             return sample_clients(distri_clusters)
     
-    def _sample_clients_entropy(self, entropy, Clusters, n_samples,epoch):
-        n_sampled = max(int(self.args["frac"] * self.args["n_clients"]), 1)
+    def _sample_clients_entropy(self, entropy, Clusters, n_samples, round):
+        n_sampled = max(self.selected_client_num, 1)
         n_clients = len(n_samples)
         n_clustered = len(Clusters)
-        entropy = np.exp(self.args["gamma"]*(self.args["epochs"]- epoch)*entropy/self.args["epochs"])
+        entropy = np.exp(self._gamma * (self.num_round - round) * entropy / self.num_round)
     
         p_cluster = entropy/np.sum(entropy)
         sampled_clients = []
@@ -282,16 +304,18 @@ class HiCSSelector(ClientSelection):
         for k in range(len(clusters_selected)):
             if clusters_selected[k] == 0:
                 continue
-            select_clients = choice(Clusters[k], clusters_selected[k], replace = False)
+            select_clients = choice(
+                Clusters[k], clusters_selected[k], replace = False
+            )
             for i in range(clusters_selected[k]):
                 sampled_clients.append(select_clients[i])
         return sampled_clients
 
     def _estimated_entropy_from_grad(self, magnitudes):
         estimated_H = []
-        T = self.args["temp"]
-        for idx in range(self.args["n_clients"]):
-            magnitudes[idx] = np.exp(magnitudes[idx]/T)/ np.sum(np.exp(magnitudes[idx]/T))
+        T = self._temp
+        for idx in range(self.total):
+            magnitudes[idx] = np.exp(magnitudes[idx]/T) / np.sum(np.exp(magnitudes[idx]/T))
             pk = np.array(magnitudes[idx])
             estimated_h = scipy.stats.entropy(pk)
             estimated_H.append(estimated_h)
@@ -317,7 +341,7 @@ class HiCSSelector(ClientSelection):
         metric_matrix = np.zeros((n_clients, n_clients))
         for i, j in product(range(n_clients), range(n_clients)):
             metric = get_similarity(local_model_grads[i], local_model_grads[j], distance_type) 
-            metric_matrix[i, j] =  metric + self.args["lambda"]*abs(estimated_H[i] - estimated_H[j])
+            metric_matrix[i, j] =  metric + self._lambda*abs(estimated_H[i] - estimated_H[j])
         return metric_matrix
     
     def _magnitude_gradient(self, gradients):

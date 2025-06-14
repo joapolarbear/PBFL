@@ -2,7 +2,7 @@ import argparse
 
 ALL_METHODS = [
     'Random', 'Cluster1', 'Cluster2', 'Pow-d', 'AFL', 'DivFL', 'GradNorm',
-    'GPFL', "FedCorr", "Single", "FedCor", "Cosin"
+    'GPFL', "FedCorr", "Single", "FedCor", "Cosin", "HiCS"
 ]
 
 
@@ -43,9 +43,9 @@ def get_args():
     parser.add_argument('--alpha3', type=float, default=0.1, help='alpha3 for AFL')
     
     # training setting
-    parser.add_argument('-E', '--num_epoch', type=int, default=1, help='number of epochs')
+    parser.add_argument('-E', '--num_epoch', type=int, default=1, help='number of client epochs')
     parser.add_argument('-B', '--batch_size', type=int, default=64, help='batch size of each client data')
-    parser.add_argument('-R', '--num_round', type=int, default=2000, help='total number of rounds')
+    parser.add_argument('-R', '--num_round', type=int, default=2000, help='total number of global rounds')
     parser.add_argument('-A', '--num_clients_per_round', type=int, default=10, help='number of participated clients')
     parser.add_argument('-K', '--total_num_clients', type=int, default=None, help='total number of clients')
 
