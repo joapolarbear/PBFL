@@ -1,0 +1,9 @@
+repos:
+-   repo: local
+    hooks:
+    -   id: linter
+        name: linter
+        entry: python3 linter.py
+        language: system
+        types: [python]
+        pass_filenames: true
