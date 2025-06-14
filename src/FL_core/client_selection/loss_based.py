@@ -49,7 +49,7 @@ class PowerOfChoice(ClientSelection):
         super().__init__(total, device)
         #self.d = d
 
-    def setup(self, n_samples):
+    def before_train(self, n_samples, global_m):
         client_ids = sorted(n_samples.keys())
         n_samples = np.array([n_samples[i] for i in client_ids])
         self.weights = n_samples / np.sum(n_samples)

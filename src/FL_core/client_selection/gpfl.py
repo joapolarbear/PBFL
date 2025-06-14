@@ -63,11 +63,11 @@ class Proj_Bandit(ClientSelection):
         print(self.client2selected_cnt)
         sys.exit(0)
     
-    def setup(self, n_samples):
+    def before_train(self, n_samples, global_m):
         self.accuracy_per_update = [self.global_accu]
         self.loss_per_update = [self.global_loss]
 
-    def init(self, global_m, l=None):
+    def before_step(self, global_m, local_models=None):
         self.prev_global_params = deepcopy([tens.detach().to(self.device) for tens in list(global_m.parameters())])
 
     def update_proj_list(self, selected_client_idxs, global_m, local_models, improved):
@@ -124,8 +124,10 @@ class Proj_Bandit(ClientSelection):
         # print("ucb", ucb)
         return ucb
     
-    def post_update(self, client_idxs, local_models, global_m):
-        # import pdb; pdb.set_trace()
+    def after_step(self, client_idxs, local_models, global_m, loss, acc):
+        self.global_loss = loss
+        self.global_accu = acc
+        
         self.accuracy_per_update.append(self.global_accu)
         self.loss_per_update.append(self.global_loss)
 

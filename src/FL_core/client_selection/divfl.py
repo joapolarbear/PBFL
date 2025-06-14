@@ -26,7 +26,7 @@ class DivFL(ClientSelection):
             sys.exit('Please set the hyperparameter: subset ratio! =)')
         self.subset_ratio = subset_ratio
 
-    def init(self, global_m, l=None):
+    def before_step(self, global_m, local_models=None):
         self.prev_global_m = global_m
 
     def select(self, n, client_idxs, metric, round=0, results=None):

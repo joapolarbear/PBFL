@@ -79,14 +79,14 @@ class FedCor(ClientSelection):
         self.mvnt = False
         self.mvnt_interval = 100
         
-    def setup(self, train_size):
+    def before_train(self, train_size, global_m):
         assert self.server is not None
         # Test the global model before training
         metrics = self.server.test(self.total, phase='Test', save=False)
         list_acc, list_loss = metrics['acc'], metrics['loss']
         self.gt_global_losses.append(list_loss)
         
-    def init(self, global_m, l=None):
+    def before_step(self, global_m, local_models=None):
         pass
         
     def select(self, selected_num, client_dixs, metric):

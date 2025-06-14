@@ -18,7 +18,7 @@ class ClusteredSampling1(ClientSelection):
         super().__init__(total, device)
         self.n_cluster = n_cluster
 
-    def setup(self, n_samples):
+    def before_train(self, n_samples, global_m):
         '''
         Since clustering is performed according to the clients sample size n_i,
         unless n_i changes during the learning process,
@@ -67,7 +67,7 @@ class ClusteredSampling2(ClientSelection):
         super().__init__(total, device)
         self.distance_type = dist
 
-    def setup(self, n_samples):
+    def before_train(self, n_samples, global_m):
         """
         return the `representative gradient` formed by the difference
         between the local work and the sent global model
@@ -76,7 +76,7 @@ class ClusteredSampling2(ClientSelection):
         n_samples = np.array([n_samples[i] for i in client_ids])
         self.weights = n_samples / np.sum(n_samples)
 
-    def init(self, global_m, local_models):
+    def before_step(self, global_m, local_models=None):
         self.prev_global_m = global_m
         self.gradients = self.get_gradients(global_m, local_models)
 

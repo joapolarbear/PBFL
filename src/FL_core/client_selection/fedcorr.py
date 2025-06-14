@@ -71,10 +71,10 @@ class FedCorr(ClientSelection):
     def stage_name(self):
         return self.stage_names[self.stage-1]
     
-    def setup(self, train_sizes):
+    def before_train(self, train_sizes, global_m):
         self.train_sizes = train_sizes
 
-    def init(self, global_model):
+    def before_step(self, global_m, local_models=None):
         logger.info(f">> [{self.stage_name} iter {self.iter_cnt_per_stage}/{self.iter_cnt}] init ... ")
         need_init = True
         if self.stage == 1:

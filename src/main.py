@@ -2,7 +2,6 @@
 Client Selection for Federated Learning
 '''
 import os
-import sys
 import time
 
 AVAILABLE_WANDB = True
@@ -36,32 +35,32 @@ def federated_algorithm(dataset, model, args):
 def client_selection_method(args):
     #total = args.total_num_client if args.num_available is None else args.num_available
     kwargs = {'total': args.total_num_client, 'device': args.device}
-    if args.method == 'Random':
+    if args.method == SelectMethod.random:
         return RandomSelection(**kwargs)
-    elif args.method == 'AFL':
+    elif args.method == SelectMethod.afl:
         return ActiveFederatedLearning(**kwargs, args=args)
-    elif args.method == 'Cluster1':
+    elif args.method == SelectMethod.cluster1:
         return ClusteredSampling1(**kwargs, n_cluster=args.num_clients_per_round)
-    elif args.method == 'Cluster2':
+    elif args.method == SelectMethod.cluster2:
         return ClusteredSampling2(**kwargs, dist=args.distance_type)
-    elif args.method == 'Pow-d':
+    elif args.method == SelectMethod.pow_d:
         assert args.num_candidates is not None
         return PowerOfChoice(**kwargs, d=args.num_candidates)
-    elif args.method == 'DivFL':
+    elif args.method == SelectMethod.divfl:
         assert args.subset_ratio is not None
         return DivFL(**kwargs, subset_ratio=args.subset_ratio)
     elif args.method == 'GradNorm':
         return GradNorm(**kwargs)
-    elif args.method == 'GPFL':
+    elif args.method == SelectMethod.gpfl:
         return Proj_Bandit(args, **kwargs)
-    elif args.method == "FedCor":
+    elif args.method == SelectMethod.fedcor:
         return FedCor(args, **kwargs)
-    elif args.method == "Single":
+    elif args.method == SelectMethod.single:
         args.total_num_client = args.num_clients_per_round = 1
         return SingleSelection(**kwargs)
-    elif args.method == "Cosin":
+    elif args.method == SelectMethod.cosin:
         return CosineSimilaritySelector(args, **kwargs)
-    elif args.method == "HiCS":
+    elif args.method == SelectMethod.hisc:
         return HiCSSelector()
     else:
         raise('CHECK THE NAME OF YOUR SELECTION METHOD')

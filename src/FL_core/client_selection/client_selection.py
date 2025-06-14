@@ -23,6 +23,12 @@ class ClientSelection:
     
     def post_process(self, engaged_client_indices):
         pass
+    
+    def before_step(self, global_m, local_models=None):
+        pass
+    
+    def after_step(self, client_idxs, local_models, global_m, loss, acc):
+        pass
 
 
 

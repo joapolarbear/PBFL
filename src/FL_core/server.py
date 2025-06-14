@@ -22,6 +22,7 @@ def print_selected_client(client_indices, THRESHOLD = 100):
     else:
         logger.info(f'Selected clients: [{", ".join(rst[:THRESHOLD])} ... ]')
 
+
 class Server(object):
     def __init__(self, data, init_model, args, selection, fed_algo, files):
         """
@@ -36,9 +37,9 @@ class Server(object):
             results: results for recording
         """
         self.train_data = data['train']['data']
-        self.train_sizes = data['train']['data_sizes']
+        self.train_sizes: dict[int, int] = data['train']['data_sizes']
         self.test_data = data['test']['data']
-        self.test_sizes = data['test']['data_sizes']
+        self.test_sizes: dict[int, int] = data['test']['data_sizes']
         self.test_clients = data['test']['data_sizes'].keys()
 
         self.device = args.device
@@ -74,8 +75,8 @@ class Server(object):
         self._init_clients(init_model)
 
         # initialize the client selection method
-        if self.args.method in NEED_SETUP_METHOD:
-            self.selection_method.setup(self.train_sizes)
+        if self.args.method in NEED_BEFORE_TRAIN_METHOD:
+            self.selection_method.before_train(self.train_sizes, self.global_model)
 
         if self.args.method in LOSS_THRESHOLD:
             self.ltr = 0.0
@@ -123,7 +124,7 @@ class Server(object):
 
     def global_test(self):
         if self.global_trainer is None:
-            return
+            return {}
         result = self.global_trainer.test(self.global_model, self.global_test_data)
         return result
 
@@ -157,19 +158,21 @@ class Server(object):
             #                        Set client selection methods
             ##################################################################
             # initialize selection methods by setting given global model
-            if self.args.method in NEED_INIT_METHOD:
-                if self.args.method in ["GPFL", "DivFL", "FedCorr", "Cosin"]:
-                    self.selection_method.init(self.global_model)
+            if self.args.method in NEED_BEFORE_STEP_METHOD:
+                if self.args.method in [
+                    SelectMethod.gpfl, SelectMethod.divfl, 
+                    "FedCorr", SelectMethod.cosin
+                ]:
+                    self.selection_method.before_step(self.global_model)
                 else:
                     raise NotImplementedError("We do not maintain a cost model for each client, "
                         "so we fail to get the local model before client selection. \n"
                         "\t Methods requiring init only include `Cluster2`")
                     local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
-                    self.selection_method.init(self.global_model, local_models)
+                    self.selection_method.before_step(self.global_model, local_models)
                     del local_models
             # candidate client selection before local training
             if self.args.method in CANDIDATE_SELECTION_METHOD:
-                # np.random.seed((self.args.seed+1)*10000000 + round_idx)
                 logger.info(f'Candidate client selection {self.args.num_candidates}/{len(client_indices)}')
                 client_indices = self.selection_method.select_candidates(client_indices, self.args.num_candidates)
                 print_selected_client(client_indices)
@@ -179,12 +182,14 @@ class Server(object):
             ##################################################################
             # client selection before local training (for efficiency)
             if self.args.method in PRE_SELECTION_METHOD:
-                # np.random.seed((self.args.seed+1)*10000 + round_idx)
-                
-                if self.args.method in ["GPFL", 'Cosin']:
-                    kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
+                if self.args.method in [SelectMethod.gpfl, SelectMethod.cosin, SelectMethod.hisc]:
                     num_before = len(client_indices)
-                    client_indices = self.selection_method.select(**kwargs, metric=None)
+                    client_indices = self.selection_method.select(
+                        self.num_clients_per_round, 
+                        client_idxs=client_indices,
+                        round=round_idx,
+                        metric=None
+                    )
                     logger.info(f'Pre-client selection {num_before} -> {len(client_indices)}')
                 elif self.args.method == "FedCorr":
                     num_before = len(client_indices)
@@ -208,16 +213,24 @@ class Server(object):
             ##################################################################
             if self.args.method not in PRE_SELECTION_METHOD:
                 logger.info(f'Post-client selection {self.num_clients_per_round}/{len(client_indices)}')
-                kwargs = {'n': self.num_clients_per_round, 'client_idxs': client_indices, 'round': round_idx}
-                kwargs['results'] = self.files['prob'] if self.save_probs else None
                 # select by local models(gradients)
                 if self.args.method in NEED_LOCAL_MODELS_METHOD:
                     local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
-                    selected_client_indices = self.selection_method.select(**kwargs, metric=local_models)
+                    selected_client_indices = self.selection_method.select(
+                        self.num_clients_per_round,
+                        client_idxs=client_indices,
+                        round=round_idx,
+                        results=self.files['prob'] if self.save_probs else None, metric=local_models
+                    )
                     del local_models
                 # select by local losses
                 else:
-                    selected_client_indices = self.selection_method.select(**kwargs, metric=local_metrics)
+                    selected_client_indices = self.selection_method.select(
+                        self.num_clients_per_round,
+                        client_idxs=client_indices,
+                        round=round_idx,
+                        results=self.files['prob'] if self.save_probs else None, metric=local_metrics
+                    )
                 if self.args.method in CLIENT_UPDATE_METHOD:
                     for idx in client_indices:
                         self.client_list[idx].update_ema_variables(round_idx)
@@ -231,8 +244,11 @@ class Server(object):
             # self.weight_variance(local_models) # check variance of client weights
             self.save_current_updates(local_losses, accuracy, len(client_indices), phase='Train', round=round_idx)
             self.save_selected_clients(round_idx, client_indices)
+            
             # DEBUGGING
-            if self.args.method not in ["GPFL", "FedCorr", "Cosin"]:
+            if self.args.method not in [
+                SelectMethod.gpfl, "FedCorr", SelectMethod.cosin
+            ]:
                 assert len(client_indices) == self.num_clients_per_round, \
                     (len(client_indices), self.num_clients_per_round)
                     
@@ -256,12 +272,10 @@ class Server(object):
                 self.test(self.total_num_client, phase='TrainALL')
                 self.test_on_training_data = False
             # test on test dataset
-            result = self.global_test()
+            result: dict = self.global_test()
             local_models = [self.client_list[idx].trainer.get_model() for idx in client_indices]
-            if self.args.method in ["GPFL", 'Cosin']:
-                self.selection_method.global_loss = result["loss"]
-                self.selection_method.global_accu = result["acc"]
-                self.selection_method.post_update(client_indices, local_models, self.global_model)
+            if self.args.method in NEED_AFTER_STEP_METHOD:
+                self.selection_method.after_step(client_indices, local_models, self.global_model, result["loss"], result["acc"])
             # self.test(len(self.test_clients), phase='Test')
             phase='Test'
             self.record[f'{phase}/Loss'] = result["loss"]
@@ -353,10 +367,7 @@ class Server(object):
                 local_losses.extend(result['loss'])
                 accuracy.extend(result['acc'])
                 local_metrics.extend(result['metric'])
-
-                # progressBar(len(local_losses), len(client_indices),
-                #             {'loss': sum(result['loss'])/len(result), 'acc': sum(result['acc'])/len(result)})
-
+                
                 if self.args.method in LOSS_THRESHOLD:
                     if min(result['llow']) < ll: ll = min(result['llow'])
                     lh += sum(result['lhigh'])
@@ -372,8 +383,6 @@ class Server(object):
                 if self.args.method in LOSS_THRESHOLD:
                     if result['llow'] < ll: ll = result['llow'].item()
                     lh += result['lhigh']
-
-                # progressBar(len(local_losses), len(client_indices), result)
 
         if self.args.method in LOSS_THRESHOLD:
             lh /= len(client_indices)
@@ -413,15 +422,12 @@ class Server(object):
                 result = {k: [result[idx][k] for idx in range(len(result))] for k in result[0].keys()}
                 metrics['loss'].extend(result['loss'])
                 metrics['acc'].extend(result['acc'])
-                # progressBar(len(metrics['acc']) * iter, num_clients_for_test, phase='Test',
-                #             result={'loss': sum(result['loss']) / len(result), 'acc': sum(result['acc']) / len(result)})
         else:
             for client_idx in clients_to_test:
                 result = self.local_testing(client_idx, 
                                     use_local_model=use_local_model)
                 metrics['loss'].append(result['loss'])
                 metrics['acc'].append(result['acc'])
-                # progressBar(len(metrics['acc']), num_clients_for_test, result, phase='Test')
         if save:
             self.save_current_updates(metrics['loss'], metrics['acc'], num_clients_for_test, phase=phase)
         return metrics
@@ -504,23 +510,3 @@ class Server(object):
             variance += torch.var(torch.tensor(tmp), dim=0)
         variance /= len(local_models)
         logger.info('variance of model weights {:.8f}'.format(variance))
-
-
-def progressBar(idx, total, result, phase='Train', bar_length=20):
-    """
-    progress bar
-    ---
-    Args
-        idx: current client index or number of trained clients till now
-        total: total number of clients
-        phase: Train or Test
-        bar_length: length of progress bar
-    """
-    percent = float(idx) / total
-    arrow = '=' * int(round(percent * bar_length) - 1) + '>'
-    spaces = ' ' * (bar_length - len(arrow))
-
-    sys.stdout.write("\r>> Client {}ing: [{}] {}% ({}/{}) Loss {:.6f} Acc {:.4f}".format(
-        phase, arrow + spaces, int(round(percent * 100)), idx, total, result['loss'], result['acc'])
-    )
-    sys.stdout.flush()
