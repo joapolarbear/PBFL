@@ -7,3 +7,4 @@ from .divfl import *
 from .fedcor import *
 from .gpfl import *
 from .cos_similarity import *
+from .hics import *
