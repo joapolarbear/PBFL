@@ -42,6 +42,7 @@ NEED_BEFORE_STEP_METHOD = [
     SelectMethod.divfl,
     SelectMethod.gpfl,
     SelectMethod.cosin,
+    SelectMethod.hisc,
 ]
 
 NEED_AFTER_STEP_METHOD = [

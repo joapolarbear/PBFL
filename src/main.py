@@ -61,7 +61,7 @@ def client_selection_method(args):
     elif args.method == SelectMethod.cosin:
         return CosineSimilaritySelector(args, **kwargs)
     elif args.method == SelectMethod.hisc:
-        return HiCSSelector()
+        return HiCSSelector(args, **kwargs)
     else:
         raise('CHECK THE NAME OF YOUR SELECTION METHOD')
 

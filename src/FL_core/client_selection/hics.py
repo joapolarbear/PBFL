@@ -200,7 +200,7 @@ class HiCSSelector(ClientSelection):
         # Similar to ClusteredSampling2 and PowerOfChoice
         client_ids = sorted(n_samples.keys())
         self.n_samples = np.array([n_samples[i] for i in client_ids])
-        self.weights = n_samples / np.sum(n_samples)
+        self.weights = self.n_samples / np.sum(self.n_samples)
         
         self.gradients = get_gradients_fc(
             "clustered_2", 

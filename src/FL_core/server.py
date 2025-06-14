@@ -161,7 +161,8 @@ class Server(object):
             if self.args.method in NEED_BEFORE_STEP_METHOD:
                 if self.args.method in [
                     SelectMethod.gpfl, SelectMethod.divfl, 
-                    "FedCorr", SelectMethod.cosin
+                    "FedCorr", SelectMethod.cosin,
+                    SelectMethod.hisc,
                 ]:
                     self.selection_method.before_step(self.global_model)
                 else:
