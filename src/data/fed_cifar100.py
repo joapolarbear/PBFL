@@ -18,12 +18,13 @@ class FederatedCIFAR100Dataset(BaseDataset):
     def __init__(self, data_dir, args):
         super(FederatedCIFAR100Dataset, self).__init__()
         self.num_classes = 100
-        self.train_num_clients = 500
-        self.test_num_clients = 100
         self.batch_size = args.batch_size # local batch size for local training # 20
 
+        self._train_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
+        self._test_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
+        
         self._init_data(data_dir)
-        print(f'Total number of users: {self.train_num_clients}')
+        print(f'Total number of users: {self._train_num_clients}')
 
     def _init_data(self, data_dir):
         file_name = os.path.join(data_dir, 'FedCIFAR100_preprocessed.pickle')
@@ -31,7 +32,7 @@ class FederatedCIFAR100Dataset(BaseDataset):
             with open(file_name, 'rb') as f:
                 dataset = pickle.load(f)
         else:
-            dataset = preprocess(data_dir, self.train_num_clients)
+            dataset = preprocess(data_dir, self._train_num_clients)
         self.dataset = dataset
 
 
@@ -41,8 +42,9 @@ def preprocess(data_dir, num_clients=None):
 
     train_ids = list(train_data['examples'].keys())
     test_ids = list(test_data['examples'].keys())
-    num_clients_train = len(train_ids)
-    num_clients_test = len(test_ids)
+    
+    num_clients_train = len(train_ids) if num_clients is None else num_clients
+    num_clients_test = len(test_ids) if num_clients is None else num_clients
     print(f'num_clients_train {num_clients_train} num_clients_test {num_clients_test}')
 
     # local dataset

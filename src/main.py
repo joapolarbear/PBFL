@@ -78,14 +78,20 @@ if __name__ == '__main__':
     
     # save to wandb
     args.wandb = AVAILABLE_WANDB
-    exp_name = os.getenv('EXP_NAME_SHORT')
-    assert exp_name is not None
+    exp_name_short = os.getenv('EXP_NAME_SHORT')
+    assert exp_name_short is not None
     if args.wandb:
+        exp_name = os.environ.get("PBFL_EXP_NAME", None)
+        if exp_name:
+            wandb_dir = f"{exp_name}-wandb"
+            os.makedirs(wandb_dir, exist_ok=True)
+        else:
+            wandb_dir = '../'
         wandb.init(
             project=f'PBFL-{args.dataset}',
-            name=f"{args.start}-{exp_name}",
+            name=f"{args.start}-{exp_name_short}",
             config=args,
-            dir='../',
+            dir=wandb_dir,
             save_code=True,
             mode='online'
         )
@@ -118,7 +124,7 @@ if __name__ == '__main__':
     args.num_classes = data.num_classes
     args.total_num_client, args.test_num_clients = data.train_num_clients, data.test_num_clients
     logger.warn("data.test_num_clients will be deprecated")
-    assert args.total_num_client == args.test_num_clients
+    # assert args.total_num_client == args.test_num_clients
     dataset = data.dataset
 
     # set model

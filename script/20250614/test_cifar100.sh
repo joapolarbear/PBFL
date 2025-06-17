@@ -5,29 +5,26 @@ set -x
 DROP_NUM=1
 
 export PBFL_EXP_DATETIME=`date '+%Y%m%d-%H%M%S'`
-export PBFL_EXP_DIR=save/results/${PBFL_EXP_DATETIME}-hics
+export PBFL_EXP_DIR=save/results/${PBFL_EXP_DATETIME}-cifar100
 mkdir -p $PBFL_EXP_DIR
 DATADIR=./data
 
 #################################################
 #              Hyper-parameters
 #################################################
-BATCH_SIZE=50
-TRAIN_ROUND=2000
-TOTAL_CLIENT_NUM=100
+BATCH_SIZE=16
+TRAIN_ROUND=1000
+TOTAL_CLIENT_NUM=500
 LOCAL_EP=5
 
 #################################################
 #              Configurations to test
 #################################################
-# DATASETS=(FederatedEMNIST)
-# DATASETS=(PartitionedCIFAR10)
-DATASETS=(cifar)
-# DATASETS=(fmnist cifar)
+DATASETS=(FedCIFAR100)
 
 # Distribution types
 # DIST_TYPES=(one_shard two_shard dir)
-DIST_TYPES=(dir)
+DIST_TYPES=(default)
 
 # METHODS=(Random)
 # METHODS=(GPFL Random)
@@ -35,7 +32,7 @@ DIST_TYPES=(dir)
 # METHODS=(Pow-d)
 # METHODS=(DivFL)
 METHODS=(HiCS)
-# METHODS=(GPFL FedCor Random Pow-d DivFL)
+# METHODS=(HiCS GPFL FedCor Random Pow-d)
 # METHODS=(Random FedCor Pow-d)
 
 #################################################
@@ -44,7 +41,6 @@ METHODS=(HiCS)
 for dataset in ${DATASETS[@]}; do
 for dist_type in ${DIST_TYPES[@]}; do
 for method in ${METHODS[@]}; do
-
     if [[ ${dist_type} == "one_shard" ]]; then
         NUM_CLIENT_PER_ROUND=10
         DIST_ARG="--shards_per_client=1 "
@@ -54,6 +50,9 @@ for method in ${METHODS[@]}; do
     elif [[ ${dist_type} == "dir" ]]; then
         NUM_CLIENT_PER_ROUND=5
         DIST_ARG="--dirichlet_alpha=0.2 "
+    elif [[ ${dist_type} == "default" ]]; then
+        NUM_CLIENT_PER_ROUND=10
+        DIST_ARG=" "
     else
         echo "Error"
         exit
@@ -72,6 +71,8 @@ for method in ${METHODS[@]}; do
         model="CNN"
     elif [[ ${dataset} == "fmnist" ]]; then
         model="MLP"
+    elif [[ ${dataset} == "FedCIFAR100" ]]; then
+        model="ResNet"
     else
         exit
     fi

@@ -33,7 +33,7 @@ DIST_TYPES=(one_shard)
 # METHODS=(GPFL Random)
 # METHODS=(FedCor)
 # METHODS=(Pow-d)
-METHODS=(DivFL)
+METHODS=(HiCS)
 # METHODS=(GPFL FedCor Random Pow-d DivFL)
 # METHODS=(Random FedCor Pow-d)
 
