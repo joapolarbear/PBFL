@@ -71,7 +71,7 @@ for method in ${METHODS[@]}; do
 
     export PBFL_EXP_NAME="${PBFL_EXP_DIR}/${method}_policy-${dist_type}-${ucb_alpha}_ucb_alpha-${TOTAL_CLIENT_NUM}to${NUM_CLIENT_PER_ROUND}-${dataset}-${model}"
     # echo $FedCorArg
-    python3 src/main.py \
+    python3 pbfl/main.py \
         --dataset ${dataset} \
         --model ${model} \
         --kernel_sizes 3 3 3 --num_filters 32 64 64 --mlp_layer 64 \

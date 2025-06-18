@@ -170,12 +170,12 @@ class HiCSSelector(ClientSelection):
         
         # Refer to the paper and https://github.com/CityChan/HiCS-FL/blob/master/configs/FMNIST/ablation/FMNIST_hics_1_lambda10_gamma4_M5.json
         # Refert to 
-        if args.dataset == "cifar":
+        if args.dataset in ["cifar", "FedCIFAR100"]:
             self._temp = 0.015
         elif args.dataset == "fmnist":
             self._temp = 0.0025
         else:
-            raise ValueError
+            raise ValueError(args.dataset)
         self.hics_alphas = [0.001, 0.002, 0.005, 0.01, 0.5]
         self._lambda = 10
         self._gamma = 4

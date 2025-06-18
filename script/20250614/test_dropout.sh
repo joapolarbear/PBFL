@@ -33,7 +33,8 @@ DIST_TYPES=(one_shard)
 # METHODS=(GPFL Random)
 # METHODS=(FedCor)
 # METHODS=(Pow-d)
-METHODS=(HiCS)
+# METHODS=(HiCS)
+METHODS=(DivFL)
 # METHODS=(GPFL FedCor Random Pow-d DivFL)
 # METHODS=(Random FedCor Pow-d)
 
@@ -78,7 +79,7 @@ for method in ${METHODS[@]}; do
     export EXP_NAME_SHORT="${method}_policy-${dist_type}-${TOTAL_CLIENT_NUM}to${NUM_CLIENT_PER_ROUND}-drop${DROP_NUM}-${dataset}-${model}"
     export PBFL_EXP_NAME="${PBFL_EXP_DIR}/$EXP_NAME_SHORT"
     # PYTHONPATH=
-    python3 src/main.py \
+    python3 pbfl/main.py \
         --dataset ${dataset} \
         --model ${model} \
         --kernel_sizes 3 3 3 --num_filters 32 64 64 --mlp_layer 64 \
@@ -106,9 +107,9 @@ done
 #################################################
 #              Backup
 #################################################
-# python3 src/main.py --dataset FederatedEMNIST --method GPFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 200 -d 10
-# src/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.001 -B 50 -R 1000 --method GPFL --comment ucb0to4/5
-# src/main.py --dataset FederatedEMNIST_nonIID --method GPFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 500
+# python3 pbfl/main.py --dataset FederatedEMNIST --method GPFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 200 -d 10
+# pbfl/main.py --dataset PartitionedCIFAR10 --model CNN -A 10 -K 100 --lr_local 0.001 -B 50 -R 1000 --method GPFL --comment ucb0to4/5
+# pbfl/main.py --dataset FederatedEMNIST_nonIID --method GPFL --model CNN -A 10 -K 200 --lr_local 0.01 -B 20 -R 500
 # FedCor
 # python3 3rdparty/FedCor/main.py \
 #     --gpu=0 --gpr_gpu=0 \

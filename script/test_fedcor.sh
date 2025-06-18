@@ -15,7 +15,7 @@ DATADIR=./data
 METHODS=(FedCor)
 
 for METHOD in ${METHODS[@]}; do
-    python3 src/main.py \
+    python3 pbfl/main.py \
         --dataset ${DATASET} \
         --model ${MODEL} \
         -A ${NUM_CLIENT_PER_ROUND} \

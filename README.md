@@ -42,7 +42,7 @@ The `test.sh` script runs federated learning experiments with different client s
 The script runs the following command for each client selection method:
 
 ```shell
-python3 src/main.py \
+python3 pbfl/main.py \
     --dataset ${DATASET} \
     --model ${MODEL} \
     -A ${NUM_CLIENT_PER_ROUND} \
@@ -81,7 +81,7 @@ To start training on different datasets with various client selection strategies
 To run an experiment with the `GPFL` method on the `cifar` dataset using the `CNN` model, you can use the following command:
 
 ```shell
-python3 src/main.py \
+python3 pbfl/main.py \
     --dataset cifar \
     --model CNN \
     -A 5 \
