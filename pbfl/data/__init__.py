@@ -13,9 +13,10 @@ from .federated_emnist_iid import FederatedEMNISTDatasetIID
 from .federated_emnist_noniid import FederatedEMNISTDataset_nonIID
 
 from .base_dataset import BaseDataset
-from ..utils import logger
+from pbfl.utils import get_logger
 
 def load_data(args):
+    logger = get_logger()
     if args.dataset in ["cifar", "mnist", "fmnist"]:
         
         args.num_users = args.total_num_clients

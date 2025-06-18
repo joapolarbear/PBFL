@@ -45,10 +45,12 @@ logger = None
 
 from .argparse import get_args
 
-def init(log_dir, log_name):
+def init_args_logger(log_dir, log_name):
     global logger
     args = get_args()
     logger = Logger(args, log_dir, log_name)
     return args
-    
+
+def get_logger():
+    return logger
     

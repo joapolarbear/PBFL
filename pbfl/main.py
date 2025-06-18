@@ -13,11 +13,11 @@ except ModuleNotFoundError:
 import torch
 import random
 
-import utils
-args = utils.init(".", "pbfl")
-from utils import logger
+from pbfl.utils import init_args_logger, get_logger, save_files
+args = init_args_logger(".", "pbfl")
+logger = get_logger()
 
-from data import load_data
+from pbfl.data import load_data
 from model import create_model
 from FL_core.server import Server
 from FL_core.client_selection import *
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     fed_algo = federated_algorithm(dataset, model, args)
 
     # save results
-    files = utils.save_files(args)
+    files = save_files(args)
 
     ## train
     # set federated optim algorithm

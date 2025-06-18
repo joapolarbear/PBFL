@@ -8,7 +8,7 @@ import sys
 import signal
 import atexit
 
-from utils import logger
+from pbfl.utils import logger
 
 from .gpfl import Proj_Bandit
 

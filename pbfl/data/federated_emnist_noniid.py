@@ -6,7 +6,8 @@ import torch
 from torch.utils.data import TensorDataset
 import json
 
-from ..utils import logger
+from pbfl.utils import get_logger
+logger = get_logger()
 
 from .base_dataset import BaseDataset
 

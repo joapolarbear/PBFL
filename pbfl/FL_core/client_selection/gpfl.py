@@ -9,7 +9,7 @@ import sys
 import signal
 import atexit
 
-from utils import logger
+from pbfl.utils import logger
 
 class Proj_Bandit(ClientSelection):
     def __init__(self, args, total, device):

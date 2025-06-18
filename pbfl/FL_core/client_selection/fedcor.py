@@ -10,8 +10,7 @@ import sys
 import signal
 import atexit
 
-from utils import logger
-
+from pbfl.utils import logger
 from fedcor.GPR import Kernel_GPR, Matrix_GPR, Poly_Kernel, SE_Kernel
 # from fedcor.mvnt import MVN_Test
 

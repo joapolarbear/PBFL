@@ -7,7 +7,7 @@ from sklearn.mixture import GaussianMixture
 from .client_selection import ClientSelection
 from .fedcor_util import add_noise, lid_term, get_output
 
-from utils import logger
+from pbfl.utils import logger
 
 class FedCorr(ClientSelection):
     def __init__(self, args, total, device,

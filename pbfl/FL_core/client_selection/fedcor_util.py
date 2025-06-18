@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import copy
 from scipy.spatial.distance import cdist
 
-from utils import logger
+from pbfl.utils import logger
 
 def add_noise(args, y_train, dict_users):
     np.random.seed(args.seed)

@@ -4,7 +4,7 @@ import numpy as np
 
 from .client_selection import ClientSelection
 
-from utils import logger
+from pbfl.utils import logger
 
 '''Active Federated Learning'''
 class ActiveFederatedLearning(ClientSelection):

@@ -26,8 +26,8 @@ DATASETS=(cifar)
 # DATASETS=(fmnist cifar)
 
 # Distribution types
-# DIST_TYPES=(one_shard two_shard dir)
-DIST_TYPES=(dir)
+DIST_TYPES=(one_shard two_shard dir)
+# DIST_TYPES=(dir)
 
 # METHODS=(Random)
 # METHODS=(GPFL Random)

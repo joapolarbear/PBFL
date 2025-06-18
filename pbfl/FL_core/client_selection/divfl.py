@@ -12,8 +12,6 @@ from copy import deepcopy
 from tqdm import tqdm
 from itertools import product
 
-from utils import logger
-
 '''Diverse Client Selection'''
 class DivFL(ClientSelection):
     def __init__(self, total, device, subset_ratio=0.1):

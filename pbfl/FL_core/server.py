@@ -11,7 +11,8 @@ import copy
 from .client import Client
 from .client_selection.config import *
 from .trainer import Trainer
-from ..utils import logger
+from pbfl.utils import get_logger
+logger = get_logger()
 
 from torch.utils.data import TensorDataset
 
