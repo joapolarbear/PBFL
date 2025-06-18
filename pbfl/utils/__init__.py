@@ -43,7 +43,7 @@ def save_files(args):
 
 logger = None
 
-from utils.argparse import get_args
+from .argparse import get_args
 
 def init(log_dir, log_name):
     global logger

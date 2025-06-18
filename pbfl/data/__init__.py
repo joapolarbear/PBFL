@@ -12,10 +12,8 @@ from .partitioned_cifar10 import PartitionedCIFAR10Dataset
 from .federated_emnist_iid import FederatedEMNISTDatasetIID
 from .federated_emnist_noniid import FederatedEMNISTDataset_nonIID
 
-from fedcor.utils import get_dataset
-
 from .base_dataset import BaseDataset
-from utils import logger
+from ..utils import logger
 
 def load_data(args):
     if args.dataset in ["cifar", "mnist", "fmnist"]:
@@ -36,6 +34,7 @@ def load_data(args):
             return dataset
         print(f"Download data to {cache_path} ... ")
 
+        from fedcor.utils import get_dataset
         ### No cached data found
         train_dataset, test_dataset, user_groups, user_groups_test, \
             weights = get_dataset(args, seed=None)

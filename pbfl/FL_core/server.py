@@ -11,7 +11,7 @@ import copy
 from .client import Client
 from .client_selection.config import *
 from .trainer import Trainer
-from utils import logger
+from ..utils import logger
 
 from torch.utils.data import TensorDataset
 

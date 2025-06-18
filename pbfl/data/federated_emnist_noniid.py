@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import TensorDataset
 import json
 
-from utils import logger
+from ..utils import logger
 
 from .base_dataset import BaseDataset
 
