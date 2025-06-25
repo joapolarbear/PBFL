@@ -1,5 +1,5 @@
 #!/bin/bash
-DROP_NUM=1
+DROP_NUM=10
 export PBFL_EXP_DATETIME=`date '+%Y%m%d-%H%M%S'`
 export PBFL_EXP_DIR=save/results/${PBFL_EXP_DATETIME}-drop_num_${DROP_NUM}-3rdparty
 mkdir -p $PBFL_EXP_DIR
