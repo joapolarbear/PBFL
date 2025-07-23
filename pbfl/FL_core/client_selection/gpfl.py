@@ -179,6 +179,7 @@ class Proj_Bandit(ClientSelection):
             ucb = self.get_ucb(step=self.client_update_cnt)
             sorted_client_idxs = ucb.argsort()[::-1]
             ### Select clients
+            sorted_client_idxs = sorted_client_idxs[np.isin(sorted_client_idxs, client_idxs)]
             selected_client_index = sorted_client_idxs[:n]
             
         for client_idx in selected_client_index:

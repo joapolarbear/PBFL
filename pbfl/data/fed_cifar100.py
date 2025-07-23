@@ -14,6 +14,7 @@ import torchvision.transforms as T
 
 from .base_dataset import BaseDataset
 
+
 class FederatedCIFAR100Dataset(BaseDataset):
     def __init__(self, data_dir, args):
         super(FederatedCIFAR100Dataset, self).__init__()
@@ -25,6 +26,16 @@ class FederatedCIFAR100Dataset(BaseDataset):
         
         self._init_data(data_dir)
         print(f'Total number of users: {self._train_num_clients}')
+
+        data_size_dict: dict[int, int] = self.dataset["train"]['data_sizes']
+        data_sizes = list(data_size_dict.values())
+        _sum, _avg, _std = \
+            np.sum(data_sizes), np.average(data_sizes), np.std(data_sizes)
+
+        print(
+            f"Train with {len(data_sizes)} clients, data size: sum={_sum}, avg={_avg}, std={_std}"
+        )
+        exit(0)
 
     def _init_data(self, data_dir):
         file_name = os.path.join(data_dir, 'FedCIFAR100_preprocessed.pickle')
@@ -98,9 +109,6 @@ def preprocess(data_dir, num_clients=None):
         pickle.dump(dataset, f)
 
     return dataset
-
-
-
 
 
 def cifar100_transform(img_mean, img_std, train = True, crop_size = (24,24)):

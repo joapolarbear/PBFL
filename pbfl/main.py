@@ -9,6 +9,10 @@ try:
     import wandb
 except ModuleNotFoundError:
     AVAILABLE_WANDB = False
+
+AVAILABLE_WANDB = False
+if not AVAILABLE_WANDB:
+    input("AVAILABLE_WANDB not available, continue?")
     
 import torch
 import random

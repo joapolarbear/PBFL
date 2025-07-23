@@ -14,12 +14,12 @@ class FederatedEMNISTDataset(BaseDataset):
     def __init__(self, data_dir, args):
         super(FederatedEMNISTDataset, self).__init__()
         self.num_classes = 62
-        self.train_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
-        self.test_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
+        self._train_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
+        self._test_num_clients = 3400 if args.total_num_clients is None else args.total_num_clients
         self.batch_size = args.batch_size # local batch size for local training
 
         self._init_data(data_dir)
-        print(f'Total number of users: {self.train_num_clients}')
+        print(f'Total number of users: {self._train_num_clients}')
 
     def _init_data(self, data_dir):
         file_name = os.path.join(data_dir, 'FederatedEMNIST_preprocessed.pickle')
@@ -27,8 +27,7 @@ class FederatedEMNISTDataset(BaseDataset):
             with open(file_name, 'rb') as f:
                 dataset = pickle.load(f)
         else:
-            dataset = preprocess(data_dir, self.train_num_clients)
-            #dataset = batch_preprocess(data_dir, self.batch_size, self.train_num_clients)
+            dataset = preprocess(data_dir, self._train_num_clients)
         self.dataset = dataset
 
 

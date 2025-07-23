@@ -7,7 +7,7 @@ DROP_NUM=1
 export PBFL_EXP_DATETIME=`date '+%Y%m%d-%H%M%S'`
 export PBFL_EXP_DIR=save/results/${PBFL_EXP_DATETIME}-cos
 mkdir -p $PBFL_EXP_DIR
-DATADIR=./data
+DATADIR=./data/FederatedEMNIST
 
 #################################################
 #              Hyper-parameters

@@ -1,12 +1,20 @@
 import torch
 import numpy as np
-import os
-import pickle
+import math
 
-def _distribution_str(dist: list, max_width = 3):
+def num_digits(n: int) -> int:
+    n = abs(n)
+    if n == 0:
+        return 1
+    return int(math.log10(n)) + 1
+
+def _distribution_str(dist: list):
     _max = max(dist)
-    assert _max < 10 ** (max_width + 1)
-    return "|".join(["_" * max_width if c == 0 else "_" * (max_width-len(str(c))) + str(c) for c in dist])
+    max_width = num_digits(_max)
+    return "|".join([
+        "_" * max_width if c == 0 else "_" * (max_width-len(str(c))) + str(c) 
+        for c in dist]
+    )
 
 def _label_to_distribution(_labels):
     if isinstance(_labels, torch.Tensor):

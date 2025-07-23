@@ -27,14 +27,15 @@ DATASETS=(fmnist)
 
 # Distribution types
 # DIST_TYPES=(one_shard two_shard dir)
-DIST_TYPES=(dir)
+DIST_TYPES=(one_shard)
 
 # METHODS=(Random)
 # METHODS=(GPFL Random)
 # METHODS=(FedCor)
 # METHODS=(Pow-d)
 # METHODS=(HiCS)
-METHODS=(GPFL DivFL HiCS)
+# METHODS=(GPFL DivFL HiCS)
+METHODS=(HiCS)
 # METHODS=(GPFL FedCor Random Pow-d DivFL)
 # METHODS=(Random FedCor Pow-d)
 

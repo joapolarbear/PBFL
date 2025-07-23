@@ -32,7 +32,8 @@ DIST_TYPES=(default)
 # METHODS=(Pow-d)
 # METHODS=(DivFL)
 # METHODS=(HiCS)
-METHODS=(GPFL FedCor Random Pow-d)
+# METHODS=(GPFL FedCor Random Pow-d)
+METHODS=(Cosin)
 # METHODS=(Random FedCor Pow-d)
 
 #################################################
