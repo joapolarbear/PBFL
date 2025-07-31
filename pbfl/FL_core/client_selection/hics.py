@@ -215,19 +215,36 @@ class HiCSSelector(ClientSelection):
     def select(self, n, client_idxs, metric, round=0, results=None):
         self.round = round
         self.selected_client_num = n
-        
-        self.warmup = int(self.total / n)
-        
-        random_pool = list(range(self.total))
+
+        self.warmup = int(len(client_idxs) / n) if len(client_idxs) >= n else 1
+
+        pool = list(client_idxs)
+        pool_size = len(pool)
+
+        # 只取当前pool的梯度、权重、样本数
+        pool_gradients = [self.gradients[i] for i in pool]
+        pool_magnitudes = [self.magnitudes[i] for i in pool]
+        pool_n_samples = self.n_samples[pool] if hasattr(self, 'n_samples') else np.ones(pool_size)
+        pool_weights = pool_n_samples / np.sum(pool_n_samples)
+
         if self.round < self.warmup:
-            sampled_clients = random_pool[round*n:(round + 1)*n] 
+            sampled = pool[round*n:(round + 1)*n]
+            # 若不足n个，则补齐
+            if len(sampled) < n:
+                remain = n - len(sampled)
+                sampled += list(np.random.choice(pool, remain, replace=False))
+            sampled_clients = sampled
         else:
-            sampled_clients = self._cluster_sampling(
-                self.gradients,
-                self.magnitudes,
+            sampled_idx = self._cluster_sampling(
+                pool_gradients,
+                pool_magnitudes,
                 "cosine",
-                round
+                round,
+                pool_weights,
+                pool_n_samples
             )
+            # _cluster_sampling返回的是pool内的下标，需映射回原始client id
+            sampled_clients = [pool[i] for i in sampled_idx]
         return sampled_clients
 
     def after_step(self, client_idxs, local_models, global_m, loss, acc):
@@ -253,10 +270,10 @@ class HiCSSelector(ClientSelection):
                 
         self.magnitudes = self._magnitude_gradient(self.gradients)
     
-    def _cluster_sampling(self, gradients, magnitudes, sim_type, round):
+    def _cluster_sampling(self, gradients, magnitudes, sim_type, round, weights, n_samples):
         Clusters = []
         n_sampled = max(self.selected_client_num, 1)
-        
+
         magnitudes = self._magnitude_gradient(gradients)
         estimated_H = self._estimated_entropy_from_grad(magnitudes)
         sim_matrix = self._get_matrix_similarity_from_grads_entropy(gradients, estimated_H, distance_type=sim_type)
@@ -266,7 +283,7 @@ class HiCSSelector(ClientSelection):
             hc = AgglomerativeClustering(
                 n_clusters=self.M, metric="euclidean", linkage = 'ward'
             ) 
-         
+            
             hc.fit_predict(sim_matrix)
             labels = hc.labels_
             for i in range(self.M):
@@ -276,12 +293,12 @@ class HiCSSelector(ClientSelection):
                 estimated_H,Clusters
             )
             return self._sample_clients_entropy(
-                avg_entropy, Clusters, self.n_samples, round
+                avg_entropy, Clusters, n_samples, round
             )
 
         else:
             distri_clusters = get_clusters_with_alg2(
-                linkage_matrix, n_sampled, self.weights
+                linkage_matrix, n_sampled, weights
             )
             return sample_clients(distri_clusters)
     
@@ -313,8 +330,8 @@ class HiCSSelector(ClientSelection):
 
     def _estimated_entropy_from_grad(self, magnitudes):
         estimated_H = []
-        T = self._temp
-        for idx in range(self.total):
+        T: float = self._temp
+        for idx in range(len(magnitudes)):
             magnitudes[idx] = np.exp(magnitudes[idx]/T) / np.sum(np.exp(magnitudes[idx]/T))
             pk = np.array(magnitudes[idx])
             estimated_h = scipy.stats.entropy(pk)

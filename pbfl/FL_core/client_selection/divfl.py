@@ -101,7 +101,7 @@ class DivFL(ClientSelection):
             V_set.remove(R_set[i])
         return SUi
     
-    def lazy_greedy(self,num_total_clients,  num_select_clients):
+    def lazy_greedy(self, num_total_clients, num_select_clients):
         # initialize the ground set and the selected set
         V_set = set(range(num_total_clients))
         SUi = set()
@@ -111,7 +111,7 @@ class DivFL(ClientSelection):
         i = marg_util.argmin()
         L_s0 = 2. * marg_util.max()
         marg_util = L_s0 - marg_util
-        client_min = self.norm_diff[:,i]
+        client_min = self.norm_diff[:, i]
         # print(i)
         SUi.add(i)
         V_set.remove(i)

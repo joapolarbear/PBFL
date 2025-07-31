@@ -1,5 +1,5 @@
 #!/bin/bash
-DROP_NUM=10
+DROP_NUM=50
 export PBFL_EXP_DATETIME=`date '+%Y%m%d-%H%M%S'`
 export PBFL_EXP_DIR=save/results/${PBFL_EXP_DATETIME}-drop_num_${DROP_NUM}-3rdparty
 mkdir -p $PBFL_EXP_DIR
@@ -11,14 +11,14 @@ dataset=fmnist
 model=mlp
 
 # random 1 shard fmnist
-# method='random'
-# export EXP_NAME_SHORT="${method}_policy-${dist_type}-${TOTAL_CLIENT_NUM}to${NUM_CLIENT_PER_ROUND}-${dataset}-${model}-3rdparty"
-# export PBFL_EXP_PATH="${PBFL_EXP_DIR}/$EXP_NAME_SHORT"
-# python3 3rdparty/FedCor/main.py --gpu=0 --dataset=fmnist --model=mlp --mlp_layer 64 30  --epochs=500 --num_user=$TOTAL_CLIENT_NUM \
-#      --frac=0.1 --local_ep=3 --local_bs=64 --lr=5e-3 --schedule 150 300 --lr_decay=0.5 \
-#      --optimizer=sgd --iid=0 --unequal=0  --shards_per_client=1 --verbose=1 --seed 1 2 3 4 5 \
-#      --drop_client=$DROP_NUM \
-#      2>&1 | tee ${PBFL_EXP_PATH}_log.txt
+method='random'
+export EXP_NAME_SHORT="${method}_policy-${dist_type}-${TOTAL_CLIENT_NUM}to${NUM_CLIENT_PER_ROUND}-${dataset}-${model}-3rdparty"
+export PBFL_EXP_PATH="${PBFL_EXP_DIR}/$EXP_NAME_SHORT"
+python3 3rdparty/FedCor/main.py --gpu=0 --dataset=fmnist --model=mlp --mlp_layer 64 30  --epochs=500 --num_user=$TOTAL_CLIENT_NUM \
+     --frac=0.1 --local_ep=3 --local_bs=64 --lr=5e-3 --schedule 150 300 --lr_decay=0.5 \
+     --optimizer=sgd --iid=0 --unequal=0  --shards_per_client=1 --verbose=1 --seed 1 2 3 4 5 \
+     --drop_client=$DROP_NUM \
+     2>&1 | tee ${PBFL_EXP_PATH}_log.txt
 
 
 #### FedCor 1 shard fmnist
@@ -35,15 +35,15 @@ python3 3rdparty/FedCor/main.py --gpu=0 --gpr_gpu=0 --dataset=fmnist --model=mlp
 
 
 #### Pow-d1 shard fmnist
-# method='powd'
-# export EXP_NAME_SHORT="${method}_policy-${dist_type}-${TOTAL_CLIENT_NUM}to${NUM_CLIENT_PER_ROUND}-${dataset}-${model}-3rdparty"
-# export PBFL_EXP_PATH="${PBFL_EXP_DIR}/$EXP_NAME_SHORT"
-# python3 3rdparty/FedCor/main.py --gpu=0 --dataset=fmnist --model=mlp --mlp_layer 64 30 \
-#     --epochs=500 --num_user=$TOTAL_CLIENT_NUM --frac=0.05 --local_ep=3 --local_bs=64 --lr=5e-3 \
-#     --schedule 150 300 --lr_decay=0.5 --optimizer=sgd --iid=0 --unequal=0  --verbose=1 --seed 1 2 3 4 5 \
-#     --power_d --d=10 --shards_per_client=1 \
-#     --drop_client=$DROP_NUM \
-#     2>&1 | tee ${PBFL_EXP_PATH}_log.txt
+method='powd'
+export EXP_NAME_SHORT="${method}_policy-${dist_type}-${TOTAL_CLIENT_NUM}to${NUM_CLIENT_PER_ROUND}-${dataset}-${model}-3rdparty"
+export PBFL_EXP_PATH="${PBFL_EXP_DIR}/$EXP_NAME_SHORT"
+python3 3rdparty/FedCor/main.py --gpu=0 --dataset=fmnist --model=mlp --mlp_layer 64 30 \
+    --epochs=500 --num_user=$TOTAL_CLIENT_NUM --frac=0.05 --local_ep=3 --local_bs=64 --lr=5e-3 \
+    --schedule 150 300 --lr_decay=0.5 --optimizer=sgd --iid=0 --unequal=0  --verbose=1 --seed 1 2 3 4 5 \
+    --power_d --d=10 --shards_per_client=1 \
+    --drop_client=$DROP_NUM \
+    2>&1 | tee ${PBFL_EXP_PATH}_log.txt
 
 # #### AFL 1 shard fmnist
 # method='afl'

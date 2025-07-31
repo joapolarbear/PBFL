@@ -10,7 +10,7 @@ try:
 except ModuleNotFoundError:
     AVAILABLE_WANDB = False
 
-AVAILABLE_WANDB = False
+AVAILABLE_WANDB = True
 if not AVAILABLE_WANDB:
     input("AVAILABLE_WANDB not available, continue?")
     
